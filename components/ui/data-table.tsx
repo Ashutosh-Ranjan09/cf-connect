@@ -1,12 +1,11 @@
-'use client';
-
-import { useState ,useEffect} from 'react';
+import { useState } from 'react';
 import {
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -15,70 +14,67 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface DataTableProps<TData> {
+interface DataTableProps {
   columns: any[];
-  data: TData[];
+  data: any[];
   pageSize?: number;
 }
 
-export function DataTable<TData>({
-     columns,
-     data,
-     pageSize = 10,
-   }: DataTableProps<TData>) {
-    const [pagination, setPagination] = useState({
-       pageIndex: 0,
-       pageSize,
-     });
-     const [visibleColumns, setVisibleColumns] = useState(columns);
-     
-     // Handle responsive columns
-    useEffect(() => {
-       const handleResize = () => {        if (window.innerWidth < 640) { // sm breakpoint
-         setVisibleColumns(columns.filter(col => !col.meta?.hiddenOnMobile));
-    } else {
-           setVisibleColumns(columns);
-         }
-       };
-       
-       handleResize();
-      window.addEventListener('resize', handleResize);
-       return () => window.removeEventListener('resize', handleResize);
-     }, [columns]);
-    
-   const table = useReactTable({
-     data,
-       columns: visibleColumns,
-       getCoreRowModel: getCoreRowModel(),
-       getPaginationRowModel: getPaginationRowModel(),
-       onPaginationChange: setPagination,
-       state: {
-         pagination,
-       },
-     });
+export function DataTable({ columns, data, pageSize = 10 }: DataTableProps) {
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1200
+  );
+
+  // Update window width on resize
+  if (typeof window !== 'undefined') {
+    window.addEventListener('resize', () => {
+      setWindowWidth(window.innerWidth);
+    });
+  }
+
+  // Filter columns based on screen size
+  const visibleColumns = columns.filter((column) => {
+    // If column has hiddenOnMobile meta and screen is small, hide it
+    if (column.meta?.hiddenOnMobile && windowWidth < 640) {
+      return false;
+    }
+    return true;
+  });
+
+  const table = useReactTable({
+    data,
+    columns: visibleColumns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize,
+      },
+    },
+  });
 
   return (
-    <div className="space-y-4">
-      <div className="overflow-x-auto rounded-md border">
-        <Table>
+    <div>
+      <div className="rounded-md border overflow-hidden">
+        <Table className="w-full">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    className="px-2 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm"
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -87,18 +83,27 @@ export function DataTable<TData>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
+                  data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    <TableCell
+                      key={cell.id}
+                      className="px-2 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>
@@ -106,31 +111,26 @@ export function DataTable<TData>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0 sm:space-x-2">
-   <div className="text-xs sm:text-sm text-muted-foreground">
-     Showing {pagination.pageIndex * pagination.pageSize + 1}-
-     {Math.min((pagination.pageIndex + 1) * pagination.pageSize, data.length)} of{" "}
-     {data.length} entries
-   </div>
-   <div className="flex items-center space-x-2">
-     <Button
-       variant="outline"
-       size="sm"
-       onClick={() => table.previousPage()}
-       disabled={!table.getCanPreviousPage()}
-     >
-     </Button>
-       <ChevronLeft className="h-4 w-4" />
-     <Button
-       variant="outline"
-       size="sm"
-     onClick={() => table.nextPage()}
-      disabled={!table.getCanNextPage()}
-     >
-       <ChevronRight className="h-4 w-4" />
-     </Button>
-   </div>
-    </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+          className="h-7 w-7 p-0 sm:h-8 sm:w-8"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+          className="h-7 w-7 p-0 sm:h-8 sm:w-8"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }

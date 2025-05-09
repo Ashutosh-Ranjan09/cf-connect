@@ -2,14 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+} from 'recharts';
 import { Card } from '@/components/ui/card';
 import { getTagDistribution } from '@/lib/mockData';
 import { getChartColors } from '@/lib/utils';
 
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: Array<{ name: string; value: number; payload: { name: string; value: number; fill: string } }>;
+  payload?: Array<{
+    name: string;
+    value: number;
+    payload: { name: string; value: number; fill: string };
+  }>;
 }
 
 const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
@@ -18,7 +29,8 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
       <Card className="bg-card/95 backdrop-blur-sm p-3 border shadow-md">
         <p className="font-medium">{payload[0].name}</p>
         <p className="text-sm">
-          <span className="font-medium">{payload[0].value}</span> problems solved
+          <span className="font-medium">{payload[0].value}</span> problems
+          solved
         </p>
       </Card>
     );
@@ -30,13 +42,15 @@ export const TagDistributionChart = () => {
   const [data, setData] = useState<Array<{ name: string; value: number }>>([]);
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
-  const chartColors = getChartColors(resolvedTheme === 'dark' ? 'dark' : 'light');
-  
+  const chartColors = getChartColors(
+    resolvedTheme === 'dark' ? 'dark' : 'light'
+  );
+
   useEffect(() => {
     setMounted(true);
     setData(getTagDistribution());
   }, []);
-  
+
   if (!mounted) {
     return (
       <div className="flex items-center justify-center h-[300px]">
@@ -44,10 +58,10 @@ export const TagDistributionChart = () => {
       </div>
     );
   }
-  
+
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <PieChart>
+    <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+      <PieChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
         <Pie
           data={data}
           cx="50%"
@@ -59,7 +73,10 @@ export const TagDistributionChart = () => {
           dataKey="value"
         >
           {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+            <Cell
+              key={`cell-${index}`}
+              fill={chartColors[index % chartColors.length]}
+            />
           ))}
         </Pie>
         <Tooltip content={<CustomTooltip />} />

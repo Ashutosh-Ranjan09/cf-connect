@@ -2,13 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Cell,
+} from 'recharts';
 import { Card } from '@/components/ui/card';
 import { getDifficultyBreakdown } from '@/lib/mockData';
 
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: Array<{ value: number; payload: { rating: string; solved: number } }>;
+  payload?: Array<{
+    value: number;
+    payload: { rating: string; solved: number };
+  }>;
 }
 
 const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
@@ -17,7 +29,8 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
       <Card className="bg-card/95 backdrop-blur-sm p-3 border shadow-md">
         <p className="font-medium">Difficulty: {payload[0].payload.rating}</p>
         <p className="text-sm">
-          <span className="font-medium">{payload[0].value}</span> problems solved
+          <span className="font-medium">{payload[0].value}</span> problems
+          solved
         </p>
       </Card>
     );
@@ -28,7 +41,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 // Get color for difficulty
 const getDifficultyColor = (rating: string): string => {
   const lowerBound = parseInt(rating.split('-')[0]);
-  
+
   if (lowerBound < 1200) return '#cccccc';
   if (lowerBound < 1400) return '#77ff77';
   if (lowerBound < 1600) return '#77ddbb';
@@ -41,15 +54,17 @@ const getDifficultyColor = (rating: string): string => {
 };
 
 export const DifficultyBreakdownChart = () => {
-  const [data, setData] = useState<Array<{ rating: string; solved: number }>>([]);
+  const [data, setData] = useState<Array<{ rating: string; solved: number }>>(
+    []
+  );
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
-  
+
   useEffect(() => {
     setMounted(true);
     setData(getDifficultyBreakdown());
   }, []);
-  
+
   if (!mounted) {
     return (
       <div className="flex items-center justify-center h-[300px]">
@@ -57,7 +72,7 @@ export const DifficultyBreakdownChart = () => {
       </div>
     );
   }
-  
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart
@@ -65,20 +80,20 @@ export const DifficultyBreakdownChart = () => {
         margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
       >
         <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-        <XAxis 
-          dataKey="rating" 
-          angle={-45} 
-          textAnchor="end" 
-          height={60} 
-          tick={{ fontSize: 12 }} 
+        <XAxis
+          dataKey="rating"
+          angle={-45}
+          textAnchor="end"
+          height={60}
+          tick={{ fontSize: 12 }}
         />
         <YAxis />
         <Tooltip content={<CustomTooltip />} />
         <Bar dataKey="solved" radius={[4, 4, 0, 0]}>
           {data.map((entry, index) => (
-            <Cell 
-              key={`cell-${index}`} 
-              fill={getDifficultyColor(entry.rating)} 
+            <Cell
+              key={`cell-${index}`}
+              fill={getDifficultyColor(entry.rating)}
               fillOpacity={resolvedTheme === 'dark' ? 0.8 : 1}
             />
           ))}

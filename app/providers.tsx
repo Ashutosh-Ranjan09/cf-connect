@@ -1,6 +1,12 @@
 'use client';
 
-import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import {
+  createContext,
+  useState,
+  useContext,
+  ReactNode,
+  useEffect,
+} from 'react';
 import { ThemeProvider } from 'next-themes';
 
 // Auth Context
@@ -56,7 +62,13 @@ export type Submission = {
   id: string;
   problemId: string;
   problemName: string;
-  verdict: 'OK' | 'WRONG_ANSWER' | 'TIME_LIMIT_EXCEEDED' | 'MEMORY_LIMIT_EXCEEDED' | 'RUNTIME_ERROR' | 'COMPILATION_ERROR';
+  verdict:
+    | 'OK'
+    | 'WRONG_ANSWER'
+    | 'TIME_LIMIT_EXCEEDED'
+    | 'MEMORY_LIMIT_EXCEEDED'
+    | 'RUNTIME_ERROR'
+    | 'COMPILATION_ERROR';
   language: string;
   timeSubmitted: string;
   executionTime: number;
@@ -71,7 +83,12 @@ export type Contest = {
   startTime: string;
   duration: number; // in minutes
   type: 'Div. 1' | 'Div. 2' | 'Div. 3' | 'Div. 4' | 'Educational' | 'Global';
-  phase: 'BEFORE' | 'CODING' | 'PENDING_SYSTEM_TEST' | 'SYSTEM_TEST' | 'FINISHED';
+  phase:
+    | 'BEFORE'
+    | 'CODING'
+    | 'PENDING_SYSTEM_TEST'
+    | 'SYSTEM_TEST'
+    | 'FINISHED';
   rsvp: boolean;
   ratingDelta?: number;
 };
@@ -111,7 +128,7 @@ export function Providers({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
   const [isDataLoading, setIsDataLoading] = useState<boolean>(true);
-  
+
   // Mock data
   const [problems, setProblems] = useState<Problem[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -132,33 +149,38 @@ export function Providers({ children }: { children: ReactNode }) {
       }
     }
     setIsAuthLoading(false);
-    
+
     // Load mock data
-    import('@/lib/mockData').then(({ 
-      mockProblems, 
-      mockSubmissions, 
-      mockContests, 
-      mockUsers,
-      mockFriends,
-      mockLeaderboard
-    }) => {
-      setProblems(mockProblems);
-      setSubmissions(mockSubmissions);
-      setContests(mockContests);
-      setUsers(mockUsers);
-      setFriends(mockFriends);
-      setLeaderboard(mockLeaderboard);
-      setIsDataLoading(false);
-    });
+    import('@/lib/mockData').then(
+      ({
+        mockProblems,
+        mockSubmissions,
+        mockContests,
+        mockUsers,
+        mockFriends,
+        mockLeaderboard,
+      }) => {
+        setProblems(mockProblems);
+        setSubmissions(mockSubmissions);
+        setContests(mockContests);
+        setUsers(mockUsers);
+        setFriends(mockFriends);
+        setLeaderboard(mockLeaderboard);
+        setIsDataLoading(false);
+      }
+    );
   }, []);
 
   const login = async (handle: string, password: string): Promise<boolean> => {
     // Mock login
     setIsAuthLoading(true);
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(() => {
         setUser({ ...defaultUser, handle, isAuthenticated: true });
-        localStorage.setItem('cf_connect_auth', JSON.stringify({ ...defaultUser, handle }));
+        localStorage.setItem(
+          'cf_connect_auth',
+          JSON.stringify({ ...defaultUser, handle })
+        );
         setIsAuthLoading(false);
         resolve(true);
       }, 1000);
@@ -171,17 +193,25 @@ export function Providers({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading: isAuthLoading }}>
-      <DataContext.Provider value={{ 
-        problems, 
-        submissions, 
-        contests, 
-        users, 
-        friends, 
-        leaderboard, 
-        isLoading: isDataLoading 
-      }}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+    <AuthContext.Provider
+      value={{ user, login, logout, isLoading: isAuthLoading }}
+    >
+      <DataContext.Provider
+        value={{
+          problems,
+          submissions,
+          contests,
+          users,
+          friends,
+          leaderboard,
+          isLoading: isDataLoading,
+        }}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+        >
           {children}
         </ThemeProvider>
       </DataContext.Provider>

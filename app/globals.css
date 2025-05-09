@@ -30,7 +30,7 @@
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
-  
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -62,10 +62,64 @@
 @layer base {
   * {
     @apply border-input;
+    max-width: 100%;
   }
-  
+
   body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply bg-background text-foreground overflow-x-hidden;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
+  }
+
+  img,
+  svg,
+  video,
+  canvas,
+  audio,
+  iframe,
+  embed,
+  object {
+    @apply max-w-full;
+  }
+}
+
+/* Add these responsive utility classes */
+@layer utilities {
+  /* Extra small screens */
+  @media (min-width: 375px) {
+    .xs\:max-w-\[120px\] {
+      max-width: 120px;
+    }
+    .xs\:h-\[220px\] {
+      height: 220px;
+    }
+    /* Add more xs utilities as needed */
+  }
+
+  /* Responsive text truncation */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar but allow scrolling */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
   }
 }

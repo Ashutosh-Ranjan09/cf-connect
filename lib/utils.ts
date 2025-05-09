@@ -37,14 +37,14 @@ export function formatDate(dateString: string): string {
     if (!dateString) {
       return 'N/A';
     }
-    
+
     const date = new Date(dateString);
-    
+
     // Check if date is valid
     if (isNaN(date.getTime())) {
       return 'Invalid Date';
     }
-    
+
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'short',
@@ -64,14 +64,14 @@ export function formatContestTime(dateString: string): string {
     if (!dateString) {
       return 'N/A';
     }
-    
+
     const date = new Date(dateString);
-    
+
     // Check if date is valid
     if (isNaN(date.getTime())) {
       return 'Invalid Date';
     }
-    
+
     return new Intl.DateTimeFormat('en-US', {
       weekday: 'short',
       month: 'short',
@@ -91,24 +91,26 @@ export function timeUntilContest(dateString: string): string {
     if (!dateString) {
       return 'N/A';
     }
-    
+
     const contestDate = new Date(dateString);
-    
+
     // Check if date is valid
     if (isNaN(contestDate.getTime())) {
       return 'Invalid Date';
     }
-    
+
     const now = new Date();
     const diffMs = contestDate.getTime() - now.getTime();
-    
+
     // Already started
-    if (diffMs <= 0) return "Started";
-    
+    if (diffMs <= 0) return 'Started';
+
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const diffHours = Math.floor(
+      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
     const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     if (diffDays > 0) {
       return `${diffDays}d ${diffHours}h`;
     } else if (diffHours > 0) {
@@ -123,7 +125,10 @@ export function timeUntilContest(dateString: string): string {
 }
 
 // Format verdict with color
-export function formatVerdict(verdict: string): { text: string; color: string } {
+export function formatVerdict(verdict: string): {
+  text: string;
+  color: string;
+} {
   switch (verdict) {
     case 'OK':
       return { text: 'Accepted', color: 'text-green-500' };
@@ -156,6 +161,22 @@ export function formatTime(ms: number): string {
 // Get chart colors
 export function getChartColors(theme: 'dark' | 'light'): string[] {
   return theme === 'dark'
-    ? ['#60a5fa', '#4ade80', '#f97316', '#a855f7', '#ec4899', '#f43f5e', '#14b8a6']
-    : ['#2563eb', '#16a34a', '#ea580c', '#9333ea', '#db2777', '#e11d48', '#0d9488'];
+    ? [
+        '#60a5fa',
+        '#4ade80',
+        '#f97316',
+        '#a855f7',
+        '#ec4899',
+        '#f43f5e',
+        '#14b8a6',
+      ]
+    : [
+        '#2563eb',
+        '#16a34a',
+        '#ea580c',
+        '#9333ea',
+        '#db2777',
+        '#e11d48',
+        '#0d9488',
+      ];
 }
