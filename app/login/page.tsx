@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -34,12 +33,9 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [isSignUp, setSignup] = useState<boolean>(false);
   const { login, isLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
 
   // Form setup
   const form = useForm<LoginFormValues>({
@@ -50,23 +46,11 @@ export default function LoginPage() {
     },
   });
 
-  // Send OTP handler
-  const onSendOtp = async (values: LoginFormValues) => {
-    // Simulate OTP being sent
-    toast({
-      title: 'OTP sent successfully',
-      description: `A one-time password has been sent to the email associated with ${values.handle}`,
-      duration: 5000,
-    });
-    setOtpSent(true);
-  };
-
   // Login handler
-  const onSubmit = async () => {
+  const onSubmit = async (values:LoginFormValues) => {
     try {
       const success = await login(
-        form.getValues('handle'),
-        form.getValues('password')
+        values.handle,values.password
       );
       if (success) {
         toast({
@@ -76,6 +60,15 @@ export default function LoginPage() {
         });
         router.push('/dashboard');
       }
+      else
+      {
+        toast({
+        title: 'Login failed',
+        description: 'Please check your credentials and try again.',
+        variant: 'destructive',
+        duration: 5000,
+      });
+    }
     } catch (error) {
       toast({
         title: 'Login failed',
@@ -107,7 +100,7 @@ export default function LoginPage() {
           <Form {...form}>
             <form
               className="space-y-4 sm:space-y-6"
-              onSubmit={form.handleSubmit(onSendOtp)}
+              onSubmit={form.handleSubmit(onSubmit)}
             >
               <FormField
                 control={form.control}
@@ -122,7 +115,6 @@ export default function LoginPage() {
                           placeholder="handle"
                           className="pl-10 text-sm h-9 sm:h-10"
                           {...field}
-                          disabled={otpSent}
                         />
                       </div>
                     </FormControl>
@@ -144,7 +136,6 @@ export default function LoginPage() {
                           placeholder="••••••••"
                           className="pl-10"
                           {...field}
-                          disabled={otpSent}
                         />
                       </div>
                     </FormControl>
@@ -153,57 +144,13 @@ export default function LoginPage() {
                 )}
               />
 
-              {!otpSent ? (
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isLoading || !form.formState.isValid}
-                >
-                  {isLoading ? (
-                    <span className="flex items-center">
-                      <span className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full"></span>
-                      Sending OTP...
-                    </span>
-                  ) : (
-                    'Send OTP'
-                  )}
-                </Button>
-              ) : (
-                <div className="space-y-6">
-                  <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-md flex items-start gap-3">
-                    <Check className="h-5 w-5 text-green-500 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-green-800 dark:text-green-300">
-                        OTP sent successfully
-                      </p>
-                      <p className="text-sm text-green-700 dark:text-green-400">
-                        Check your email for a one-time password
-                      </p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <FormLabel>One-Time Password</FormLabel>
-                    <div className="mt-1">
-                      <Input
-                        type="text"
-                        placeholder="Enter OTP"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                    type="button"
-                    className="w-full"
-                    onClick={onSubmit}
-                    disabled={otp.length < 4}
-                  >
-                    Verify & Sign In
-                  </Button>
-                </div>
-              )}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading || !form.formState.isValid}
+              >
+                Login
+              </Button>
             </form>
           </Form>
 
@@ -220,7 +167,13 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-6 grid grid-cols-1 gap-3">
-              <Button variant="outline" className="w-full">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  router.push('/signup');
+                }}
+              >
                 <img
                   alt="Codeforces logo"
                   src="https://codeforces.org/s/0/favicon-32x32.png"
@@ -234,7 +187,7 @@ export default function LoginPage() {
           <div className="mt-6 flex items-center justify-center">
             <div className="text-sm">
               <Link
-                href="#"
+                href="/forgot-password"
                 className="font-medium text-primary hover:text-primary/80"
               >
                 Forgot your password?

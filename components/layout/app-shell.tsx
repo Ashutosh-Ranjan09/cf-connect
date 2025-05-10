@@ -1,28 +1,51 @@
 'use client';
 
-import { ReactNode } from 'react';
-import { usePathname } from 'next/navigation';
+import { ReactNode, useEffect, useState } from 'react';
 import { Header } from './header';
 import { Sidebar } from './sidebar';
 import { useAuth } from '@/app/providers';
-import { redirect } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 interface AppShellProps {
   children: ReactNode;
 }
 
 export const AppShell = ({ children }: AppShellProps) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading: authContextLoading } = useAuth();
+  const router = useRouter();
+  const { status: sessionStatus } = useSession();
   const pathname = usePathname();
-
+  const [isMounted, setIsMounted] = useState(false);
+  
   // Public paths that don't require authentication
-  const publicPaths = ['/', '/login'];
+  const publicPaths = ['/', '/login', '/signup', '/forgot-password'];
 
   // Check if current path is public
   const isPublicPath = publicPaths.includes(pathname);
+  
+  // Set isMounted to true after component mounts
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
+  // Handle redirects - MOVED UP before any conditional returns
+  useEffect(() => {
+    if (isMounted && !authContextLoading) {
+      // Redirect to login if not authenticated and trying to access protected route
+      if (sessionStatus === 'unauthenticated' && !isPublicPath) {
+        router.push('/login');
+      }
+      
+      // Redirect to dashboard if authenticated and trying to access public route
+      if (sessionStatus === 'authenticated' && (pathname === '/login' || pathname === '/signup')) {
+        router.push('/dashboard');
+      }
+    }
+  }, [isMounted, sessionStatus, authContextLoading, isPublicPath, pathname, router]);
 
-  // Don't redirect during loading
-  if (isLoading) {
+  // Don't render until mounted and authentication state is determined
+  if (!isMounted || (sessionStatus === 'loading' || authContextLoading)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -30,14 +53,8 @@ export const AppShell = ({ children }: AppShellProps) => {
     );
   }
 
-  // Redirect to login if not authenticated and trying to access protected route
-  if (!user?.isAuthenticated && !isPublicPath) {
-    redirect('/login');
-    return null;
-  }
-
   // Login page has no shell
-  if (pathname === '/login') {
+  if (pathname === '/login' || pathname === '/signup') {
     return <>{children}</>;
   }
 

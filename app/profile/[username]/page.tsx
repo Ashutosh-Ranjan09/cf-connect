@@ -26,6 +26,13 @@ import {
   Clock,
   Code,
   Star,
+  Edit,
+  Save,
+  X,
+  Plus,
+  Pencil,
+  Trash,
+  Linkedin,
 } from 'lucide-react';
 import { useAuth, useCodeforcesData, Submission } from '@/app/providers';
 import {
@@ -37,6 +44,7 @@ import {
   formatTime,
 } from '@/lib/utils';
 import { AppShell } from '@/components/layout/app-shell';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -50,8 +58,19 @@ export default function ProfilePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [mounted, setMounted] = useState(false);
 
+  // States for edit mode
+  const [isEditingAbout, setIsEditingAbout] = useState(false);
+  const [isEditingLinks, setIsEditingLinks] = useState(false);
+  const [aboutText, setAboutText] = useState('');
+  const [websiteLinks, setWebsiteLinks] = useState<
+    Array<{ name: string; url: string; icon: JSX.Element }>
+  >([]);
+  const [newLinkName, setNewLinkName] = useState('');
+  const [newLinkUrl, setNewLinkUrl] = useState('');
+  const [newLinkType, setNewLinkType] = useState('website');
+
   // Mocked profile data
-  const profile = {
+  const [profile, setProfile] = useState({
     handle: username,
     name:
       username === 'tourist'
@@ -88,7 +107,7 @@ export default function ProfilePage() {
         icon: <LinkIcon className="h-4 w-4" />,
       },
     ],
-  };
+  });
 
   // Filter submissions and set up
   useEffect(() => {
@@ -100,7 +119,11 @@ export default function ProfilePage() {
       setUserSubmissions(filtered);
       setFilteredSubmissions(filtered);
     }
-  }, [isLoading, submissions, username]);
+
+    // Initialize edit states
+    setAboutText(profile.aboutMe);
+    setWebsiteLinks([...profile.websites]);
+  }, [isLoading, submissions, username, profile.aboutMe, profile.websites]);
 
   // Handle search query
   useEffect(() => {
@@ -172,6 +195,66 @@ export default function ProfilePage() {
     currentStreak: 3,
   };
 
+  // Save about text
+  const handleSaveAbout = () => {
+    setProfile((prev) => ({
+      ...prev,
+      aboutMe: aboutText,
+    }));
+    setIsEditingAbout(false);
+  };
+
+  // Save links
+  const handleSaveLinks = () => {
+    setProfile((prev) => ({
+      ...prev,
+      websites: [...websiteLinks],
+    }));
+    setIsEditingLinks(false);
+  };
+
+  // Add new link
+  const handleAddLink = () => {
+    if (newLinkName.trim() && newLinkUrl.trim()) {
+      let icon;
+      switch (newLinkType) {
+        case 'github':
+          icon = <Github className="h-4 w-4" />;
+          break;
+        case 'twitter':
+          icon = <Twitter className="h-4 w-4" />;
+          break;
+        case 'linkedin':
+          icon = <Linkedin className="h-4 w-4" />;
+        default:
+          icon = <LinkIcon className="h-4 w-4" />;
+      }
+
+      setWebsiteLinks((prev) => [
+        ...prev,
+        {
+          name: newLinkName,
+          url: newLinkUrl.startsWith('http')
+            ? newLinkUrl
+            : `https://${newLinkUrl}`,
+          icon,
+        },
+      ]);
+
+      setNewLinkName('');
+      setNewLinkUrl('');
+      setNewLinkType('website');
+    }
+  };
+
+  // Remove link
+  const handleRemoveLink = (index: number) => {
+    setWebsiteLinks((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Check if current user is viewing their own profile
+  const isOwnProfile = user?.handle === username;
+
   if (!mounted || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -194,7 +277,7 @@ export default function ProfilePage() {
                     className="rounded-full h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 object-cover border-3 sm:border-4 border-background"
                   />
                   <div
-                    className={`absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-bold whitespace-nowrap ${getRatingColor(profile.rating)}`}
+                    className={`absolute -bottom-2 left-1/2 transform -translate-x-1/2  px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-bold whitespace-nowrap ${getRatingColor(profile.rating)}`}
                   >
                     {profile.rating}
                   </div>
@@ -233,10 +316,49 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <h3 className="text-sm font-medium mb-2">About</h3>
-                <p className="text-sm text-muted-foreground">
-                  {profile.aboutMe}
-                </p>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium">About</h3>
+                  {isOwnProfile && !isEditingAbout && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0"
+                      onClick={() => setIsEditingAbout(true)}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </div>
+
+                {isEditingAbout ? (
+                  <div className="space-y-2">
+                    <Textarea
+                      value={aboutText}
+                      onChange={(e) => setAboutText(e.target.value)}
+                      className="h-24 text-sm"
+                      placeholder="Tell us about yourself..."
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setIsEditingAbout(false);
+                          setAboutText(profile.aboutMe);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button size="sm" onClick={handleSaveAbout}>
+                        Save
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    {profile.aboutMe}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -276,22 +398,131 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <h3 className="text-sm font-medium mb-2">Links</h3>
-                <div className="flex flex-wrap gap-2">
-                  {profile.websites.map((site, index) => (
-                    <Button key={index} variant="outline" size="sm" asChild>
-                      <a
-                        href={site.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2"
-                      >
-                        {site.icon}
-                        <span>{site.name}</span>
-                      </a>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium">Links</h3>
+                  {isOwnProfile && !isEditingLinks && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0"
+                      onClick={() => setIsEditingLinks(true)}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
                     </Button>
-                  ))}
+                  )}
                 </div>
+
+                {isEditingLinks ? (
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      {websiteLinks.map((site, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <div className="flex-1 flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted">
+                            {site.icon}
+                            <span className="text-sm truncate flex-1">
+                              {site.name}
+                            </span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleRemoveLink(index)}
+                          >
+                            <Trash className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="p-3 border rounded-md space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label htmlFor="link-name" className="text-xs">
+                            Name
+                          </Label>
+                          <Input
+                            id="link-name"
+                            value={newLinkName}
+                            onChange={(e) => setNewLinkName(e.target.value)}
+                            placeholder="GitHub"
+                            className="h-8 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="link-type" className="text-xs">
+                            Type
+                          </Label>
+                          <select
+                            id="link-type"
+                            value={newLinkType}
+                            onChange={(e) => setNewLinkType(e.target.value)}
+                            className="flex h-8 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <option value="website">Website</option>
+                            <option value="github">GitHub</option>
+                            <option value="twitter">Twitter</option>
+                            <option value="linkedin">Linkedin</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="link-url" className="text-xs">
+                          URL
+                        </Label>
+                        <Input
+                          id="link-url"
+                          value={newLinkUrl}
+                          onChange={(e) => setNewLinkUrl(e.target.value)}
+                          placeholder="https://github.com/username"
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleAddLink}
+                        disabled={!newLinkName.trim() || !newLinkUrl.trim()}
+                      >
+                        <Plus className="h-3.5 w-3.5 mr-1.5" />
+                        Add Link
+                      </Button>
+                    </div>
+
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setIsEditingLinks(false);
+                          setWebsiteLinks([...profile.websites]);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button size="sm" onClick={handleSaveLinks}>
+                        Save
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {profile.websites.map((site, index) => (
+                      <Button key={index} variant="outline" size="sm" asChild>
+                        <a
+                          href={site.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2"
+                        >
+                          {site.icon}
+                          <span>{site.name}</span>
+                        </a>
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {user?.handle !== username && (

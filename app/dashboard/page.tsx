@@ -9,30 +9,30 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  Cell,
-  Legend,
-} from 'recharts';
+// import {
+//   ResponsiveContainer,
+//   PieChart,
+//   Pie,
+//   LineChart,
+//   Line,
+//   BarChart,
+//   Bar,
+//   XAxis,
+//   YAxis,
+//   Tooltip,
+//   CartesianGrid,
+//   Cell,
+//   Legend,
+// } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { useCodeforcesData } from '@/app/providers';
-import { getChartColors } from '@/lib/utils';
-import {
-  getTagDistribution,
-  getRatingOverTime,
-  getDifficultyBreakdown,
-} from '@/lib/mockData';
+// import { getChartColors } from '@/lib/utils';
+// import {
+//   getTagDistribution,
+//   getRatingOverTime,
+//   getDifficultyBreakdown,
+// } from '@/lib/mockData';
 import { TagDistributionChart } from '@/components/charts/tag-distribution-chart';
 import { RatingOverTimeChart } from '@/components/charts/rating-over-time-chart';
 import { DifficultyBreakdownChart } from '@/components/charts/difficulty-breakdown-chart';

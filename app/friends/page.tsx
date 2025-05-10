@@ -67,8 +67,7 @@ export default function FriendsPage() {
   const formatActivity = (friend: Friend) => {
     if (!friend.recentActivity) return null;
 
-    const { type, problemId, problemName, contestId, contestName, timestamp } =
-      friend.recentActivity;
+    const { type, problemName, contestName, timestamp } = friend.recentActivity;
 
     let message;
     if (type === 'SOLVED' && problemName) {
@@ -97,8 +96,8 @@ export default function FriendsPage() {
     }
 
     return (
-      <div className="flex items-start gap-2 sm:gap-3 pb-3 sm:pb-4">
-        <Avatar className="h-8 w-8 sm:h-10 sm:w-10 mt-1">
+      <div className="flex items-start gap-2 sm:gap-3 pb-3">
+        <Avatar className="h-8 w-8 mt-1">
           <AvatarImage src={friend.avatar} alt={friend.handle} />
           <AvatarFallback>
             {friend.handle.substring(0, 2).toUpperCase()}
@@ -132,12 +131,13 @@ export default function FriendsPage() {
 
   return (
     <AppShell>
-      <div className="container mx-auto py-3 sm:py-4 md:py-6 px-2 sm:px-4">
-        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6 md:grid-cols-3">
-          <div className="space-y-3 sm:space-y-4 md:space-y-6 md:col-span-2">
-            <Card>
+      <div className="container px-3 py-3 mx-auto sm:px-4 sm:py-4 md:py-6 lg:px-6">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6 lg:grid-cols-3">
+          {/* Main content area - takes full width on mobile, 2/3 on large screens */}
+          <div className="space-y-3 sm:space-y-4 md:space-y-6 lg:col-span-2 order-2 lg:order-1">
+            <Card className="overflow-hidden">
               <CardHeader className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2 sm:pb-3">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
                   <div>
                     <CardTitle className="text-base sm:text-lg md:text-xl">
                       Friends
@@ -146,12 +146,12 @@ export default function FriendsPage() {
                       Your competitive programming network
                     </CardDescription>
                   </div>
-                  <div className="relative w-full md:w-auto mt-2 md:mt-0">
-                    <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                  <div className="relative w-full sm:w-auto mt-2 sm:mt-0">
+                    <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                     <Input
                       type="search"
                       placeholder="Search friends..."
-                      className="pl-8 w-full md:w-[180px] lg:w-[250px] xl:w-[300px] text-sm h-8 sm:h-10"
+                      className="pl-8 w-full sm:w-[180px] md:w-[220px] lg:w-[250px] h-9"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -160,7 +160,7 @@ export default function FriendsPage() {
               </CardHeader>
               <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
                 <Tabs defaultValue="all">
-                  <TabsList className="mb-3 sm:mb-4 w-full flex overflow-x-auto no-scrollbar">
+                  <TabsList className="mb-3 sm:mb-4 w-full flex overflow-x-auto scrollbar-hide">
                     <TabsTrigger
                       value="all"
                       className="flex-1 text-xs sm:text-sm"
@@ -184,20 +184,20 @@ export default function FriendsPage() {
                   <TabsContent value="all" className="space-y-3 sm:space-y-4">
                     {filteredFriends.length === 0 ? (
                       <div className="text-center py-4 sm:py-6">
-                        <Users className="h-8 w-8 sm:h-10 sm:w-10 mx-auto text-muted-foreground opacity-50" />
+                        <Users className="h-8 w-8 mx-auto text-muted-foreground opacity-50" />
                         <p className="mt-2 text-sm text-muted-foreground">
                           No friends found matching your search.
                         </p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2">
+                      <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
                         {filteredFriends.map((friend) => (
                           <div
                             key={friend.handle}
                             className="bg-card border rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4"
                           >
-                            <div className="flex items-center gap-2 sm:gap-3">
-                              <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                              <Avatar className="h-8 w-8 flex-shrink-0">
                                 <AvatarImage
                                   src={friend.avatar}
                                   alt={friend.handle}
@@ -206,90 +206,11 @@ export default function FriendsPage() {
                                   {friend.handle.substring(0, 2).toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-1 sm:gap-2">
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                                   <Link
                                     href={`/profile/${friend.handle}`}
-                                    className="font-medium hover:underline text-sm sm:text-base truncate"
-                                  >
-                                    {friend.handle}
-                                  </Link>
-                                  <Badge
-                                    variant="outline"
-                                    className={`${getRatingColor(friend.rating)} text-xs whitespace-nowrap`}
-                                  >
-                                    {friend.rating}
-                                  </Badge>
-                                </div>
-                                <p
-                                  className={`text-xs ${getRatingColor(friend.rating)}`}
-                                >
-                                  {friend.rank}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 mt-2 sm:mt-0 self-end sm:self-auto">
-                              <Button
-                                variant={
-                                  friend.isFollowing ? 'default' : 'outline'
-                                }
-                                size="sm"
-                                className="h-7 sm:h-8 text-xs sm:text-sm"
-                                onClick={() => toggleFollow(friend.handle)}
-                              >
-                                {friend.isFollowing ? (
-                                  <>
-                                    <UserMinus className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                                    <span className="sm:inline">Unfollow</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <UserPlus className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                                    <span className="sm:inline">Follow</span>
-                                  </>
-                                )}
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 sm:h-8 sm:w-8"
-                                asChild
-                              >
-                                <Link href={`/profile/${friend.handle}`}>
-                                  <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
-                                </Link>
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </TabsContent>
-
-                  <TabsContent value="following" className="space-y-4">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {filteredFriends
-                        .filter((friend) => friend.isFollowing)
-                        .map((friend) => (
-                          <div
-                            key={friend.handle}
-                            className="bg-card border rounded-lg p-4 flex items-center justify-between gap-4"
-                          >
-                            <div className="flex items-center gap-3">
-                              <Avatar>
-                                <AvatarImage
-                                  src={friend.avatar}
-                                  alt={friend.handle}
-                                />
-                                <AvatarFallback>
-                                  {friend.handle.substring(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <Link
-                                    href={`/profile/${friend.handle}`}
-                                    className="font-medium hover:underline"
+                                    className="font-medium hover:underline text-sm truncate max-w-full sm:max-w-[120px] md:max-w-[150px]"
                                   >
                                     {friend.handle}
                                   </Link>
@@ -301,36 +222,142 @@ export default function FriendsPage() {
                                   </Badge>
                                 </div>
                                 <p
-                                  className={`text-xs ${getRatingColor(friend.rating)}`}
+                                  className={`text-xs ${getRatingColor(friend.rating)} truncate`}
                                 >
                                   {friend.rank}
                                 </p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 mt-2 sm:mt-0 self-end sm:self-auto flex-shrink-0">
                               <Button
-                                variant="default"
+                                variant={
+                                  friend.isFollowing ? 'default' : 'outline'
+                                }
                                 size="sm"
+                                className="h-7 text-xs w-full sm:w-auto"
                                 onClick={() => toggleFollow(friend.handle)}
                               >
-                                <UserMinus className="h-4 w-4 mr-1" />
-                                Unfollow
+                                {friend.isFollowing ? (
+                                  <>
+                                    <UserMinus className="h-3 w-3 mr-1" />
+                                    <span className="hidden sm:inline">
+                                      Unfollow
+                                    </span>
+                                    <span className="sm:hidden">Unfollow</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <UserPlus className="h-3 w-3 mr-1" />
+                                    <span className="hidden sm:inline">
+                                      Follow
+                                    </span>
+                                    <span className="sm:hidden">Follow</span>
+                                  </>
+                                )}
                               </Button>
-                              <Button variant="ghost" size="icon" asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                asChild
+                              >
                                 <Link href={`/profile/${friend.handle}`}>
-                                  <ExternalLink className="h-4 w-4" />
+                                  <ExternalLink className="h-3 w-3" />
                                 </Link>
                               </Button>
                             </div>
                           </div>
                         ))}
-                    </div>
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="following" className="space-y-4">
+                    {filteredFriends.filter((friend) => friend.isFollowing)
+                      .length === 0 ? (
+                      <div className="text-center py-4 sm:py-6">
+                        <UserPlus className="h-8 w-8 mx-auto text-muted-foreground opacity-50" />
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          You're not following anyone yet.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2">
+                        {filteredFriends
+                          .filter((friend) => friend.isFollowing)
+                          .map((friend) => (
+                            <div
+                              key={friend.handle}
+                              className="bg-card border rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4"
+                            >
+                              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                                <Avatar className="h-8 w-8 flex-shrink-0">
+                                  <AvatarImage
+                                    src={friend.avatar}
+                                    alt={friend.handle}
+                                  />
+                                  <AvatarFallback>
+                                    {friend.handle
+                                      .substring(0, 2)
+                                      .toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                                    <Link
+                                      href={`/profile/${friend.handle}`}
+                                      className="font-medium hover:underline text-sm truncate max-w-full sm:max-w-[120px] md:max-w-[150px]"
+                                    >
+                                      {friend.handle}
+                                    </Link>
+                                    <Badge
+                                      variant="outline"
+                                      className={`${getRatingColor(friend.rating)} text-xs`}
+                                    >
+                                      {friend.rating}
+                                    </Badge>
+                                  </div>
+                                  <p
+                                    className={`text-xs ${getRatingColor(friend.rating)} truncate`}
+                                  >
+                                    {friend.rank}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 mt-2 sm:mt-0 self-end sm:self-auto flex-shrink-0">
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  className="h-7 text-xs w-full sm:w-auto"
+                                  onClick={() => toggleFollow(friend.handle)}
+                                >
+                                  <UserMinus className="h-3 w-3 mr-1" />
+                                  <span className="hidden sm:inline">
+                                    Unfollow
+                                  </span>
+                                  <span className="sm:hidden">Unfollow</span>
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  asChild
+                                >
+                                  <Link href={`/profile/${friend.handle}`}>
+                                    <ExternalLink className="h-3 w-3" />
+                                  </Link>
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
                   </TabsContent>
 
                   <TabsContent value="followers" className="space-y-4">
-                    <div className="text-center py-6">
-                      <Users className="h-10 w-10 mx-auto text-muted-foreground opacity-50" />
-                      <p className="mt-2 text-muted-foreground">
+                    <div className="text-center py-4 sm:py-6">
+                      <Users className="h-8 w-8 mx-auto text-muted-foreground opacity-50" />
+                      <p className="mt-2 text-sm text-muted-foreground">
                         Followers coming soon!
                       </p>
                     </div>
@@ -340,8 +367,10 @@ export default function FriendsPage() {
             </Card>
           </div>
 
-          <div className="space-y-3 sm:space-y-4 md:space-y-6">
-            <Card>
+          {/* Sidebar content - takes full width on mobile, 1/3 on large screens */}
+          <div className="space-y-3 sm:space-y-4 md:space-y-6 order-1 lg:order-2 mb-3 lg:mb-0">
+            {/* Activity Feed Card */}
+            <Card className="overflow-hidden">
               <CardHeader className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2 sm:pb-3">
                 <CardTitle className="text-base sm:text-lg">
                   Activity Feed
@@ -356,8 +385,8 @@ export default function FriendsPage() {
                     .filter(
                       (friend) => friend.isFollowing && friend.recentActivity
                     )
-                    .map((friend) => (
-                      <div key={friend.handle}>
+                    .map((friend, index) => (
+                      <div key={`${friend.handle}-${index}`}>
                         {formatActivity(friend)}
                         <Separator className="my-2" />
                       </div>
@@ -365,7 +394,7 @@ export default function FriendsPage() {
                   {localFriends.filter(
                     (friend) => friend.isFollowing && friend.recentActivity
                   ).length === 0 && (
-                    <div className="text-center py-4 sm:py-6">
+                    <div className="text-center py-4">
                       <p className="text-sm text-muted-foreground">
                         No recent activity.
                       </p>
@@ -375,7 +404,8 @@ export default function FriendsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            {/* Friend Suggestions Card */}
+            <Card className="overflow-hidden">
               <CardHeader className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2 sm:pb-3">
                 <CardTitle className="text-base sm:text-lg">
                   Friend Suggestions
@@ -392,10 +422,10 @@ export default function FriendsPage() {
                     .map((friend) => (
                       <div
                         key={friend.handle}
-                        className="flex items-center justify-between gap-2 sm:gap-4"
+                        className="flex items-center justify-between gap-2"
                       >
-                        <div className="flex items-center gap-2 sm:gap-3">
-                          <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Avatar className="h-7 w-7 flex-shrink-0">
                             <AvatarImage
                               src={friend.avatar}
                               alt={friend.handle}
@@ -404,15 +434,15 @@ export default function FriendsPage() {
                               {friend.handle.substring(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="min-w-0">
+                          <div className="min-w-0 flex-1">
                             <Link
                               href={`/profile/${friend.handle}`}
-                              className="font-medium text-xs sm:text-sm hover:underline truncate block"
+                              className="font-medium text-xs hover:underline truncate block max-w-[120px] sm:max-w-full"
                             >
                               {friend.handle}
                             </Link>
                             <p
-                              className={`text-xs ${getRatingColor(friend.rating)}`}
+                              className={`text-xs ${getRatingColor(friend.rating)} truncate`}
                             >
                               {friend.rank}
                             </p>
@@ -421,7 +451,7 @@ export default function FriendsPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-7 sm:h-8 text-xs whitespace-nowrap"
+                          className="h-7 text-xs whitespace-nowrap flex-shrink-0"
                           onClick={() => toggleFollow(friend.handle)}
                         >
                           <UserPlus className="h-3 w-3 mr-1" />

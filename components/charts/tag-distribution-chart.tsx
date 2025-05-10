@@ -69,7 +69,7 @@ export const TagDistributionChart = () => {
           labelLine={false}
           outerRadius={80}
           innerRadius={40}
-          paddingAngle={2}
+          paddingAngle={0}
           dataKey="value"
         >
           {data.map((entry, index) => (

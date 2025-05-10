@@ -1,5 +1,7 @@
 'use client';
+import { signIn, signOut, SessionProvider } from "next-auth/react";
 
+import { getToken } from "next-auth/jwt";
 import {
   createContext,
   useState,
@@ -8,6 +10,7 @@ import {
   useEffect,
 } from 'react';
 import { ThemeProvider } from 'next-themes';
+import axios from 'axios';
 
 // Auth Context
 type User = {
@@ -23,6 +26,7 @@ type AuthContextType = {
   user: User | null;
   login: (handle: string, password: string) => Promise<boolean>;
   logout: () => void;
+  signup: (handle: string, password: string) => Promise<boolean>;
   isLoading: boolean;
 };
 
@@ -122,103 +126,169 @@ export type LeaderboardEntry = {
 };
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
-
-// Providers Component
-export function Providers({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+const AuthProvider=({children}:{children:ReactNode})=>{
+    const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
+  
+  // Initialize user from session token
+  useEffect(() => {
+    const initializeUser = async () => {
+      try {
+        // Use fetch to access the session data
+        const response = await fetch('/api/auth/session');
+        const session = await response.json();
+        
+        if (session && session.user) {
+          setUser({
+            ...defaultUser,
+            handle: session.user.name || 'user',
+            email: session.user.email || 'user@example.com',
+            isAuthenticated: true,
+          });
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Error initializing user:', error);
+        setUser(null);
+      } finally {
+        setIsAuthLoading(false);
+      }
+    };
+    
+    initializeUser();
+  }, []);
+  // 1. Login function
+  const login = async (handle: string, password: string): Promise<boolean> => {
+    setIsAuthLoading(true);
+    try {
+      // Use NextAuth's signIn function directly
+      const response = await signIn('credentials', {
+        redirect: false,
+        username: handle,
+        password: password,
+      });
+      
+      if (response?.error) {
+        console.error('Login failed: ', response.error);
+        setIsAuthLoading(false);
+        return false;
+      }
+      
+      // Refresh the session to get updated user data
+      const sessionResponse = await fetch('/api/auth/session');
+      const sessionData = await sessionResponse.json();
+      
+      if (sessionData && sessionData.user) {
+        setUser({
+          ...defaultUser,
+          handle: sessionData.user.name || 'user',
+          email: sessionData.user.email || 'user@example.com',
+          isAuthenticated: true,
+        });
+        setIsAuthLoading(false);
+        return true;
+      }
+      
+      setIsAuthLoading(false);
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      setIsAuthLoading(false);
+      return false;
+    }
+  };
+  
+  // 2. Logout function
+  const logout = async () => {
+    try {
+      await signOut({ redirect: false });
+      setUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+  
+  // 3. Signup function
+  const signup = async (handle: string, password: string): Promise<boolean> => {
+    try {
+      const res = await axios.post('/api/signup', {
+        username: handle,
+        password,
+      });
+      
+      if (res.status === 201 && res.data.success === true) {
+        console.log('Signup success');
+        return true;
+      } else {
+        return false;
+      }
+    } catch (err) {
+      console.error('Signup failed:', err);
+      return false;
+    }
+  };
+  return (
+    <AuthContext.Provider value={{ user, login, logout, signup, isLoading: isAuthLoading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+const DataProvider = ({ children }: { children: ReactNode }) => {
   const [isDataLoading, setIsDataLoading] = useState<boolean>(true);
-
-  // Mock data
   const [problems, setProblems] = useState<Problem[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [contests, setContests] = useState<Contest[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-
-  // Check for stored auth on mount
+  
+  // Load mock data
   useEffect(() => {
-    const storedAuth = localStorage.getItem('cf_connect_auth');
-    if (storedAuth) {
-      try {
-        const parsedUser = JSON.parse(storedAuth);
-        setUser({ ...parsedUser, isAuthenticated: true });
-      } catch (e) {
-        console.error('Failed to parse stored auth');
-      }
-    }
-    setIsAuthLoading(false);
-
-    // Load mock data
-    import('@/lib/mockData').then(
-      ({
-        mockProblems,
-        mockSubmissions,
-        mockContests,
-        mockUsers,
-        mockFriends,
-        mockLeaderboard,
-      }) => {
-        setProblems(mockProblems);
-        setSubmissions(mockSubmissions);
-        setContests(mockContests);
-        setUsers(mockUsers);
-        setFriends(mockFriends);
-        setLeaderboard(mockLeaderboard);
-        setIsDataLoading(false);
-      }
-    );
-  }, []);
-
-  const login = async (handle: string, password: string): Promise<boolean> => {
-    // Mock login
-    setIsAuthLoading(true);
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        setUser({ ...defaultUser, handle, isAuthenticated: true });
-        localStorage.setItem(
-          'cf_connect_auth',
-          JSON.stringify({ ...defaultUser, handle })
-        );
-        setIsAuthLoading(false);
-        resolve(true);
-      }, 1000);
+    import('@/lib/mockData').then(({
+      mockProblems,
+      mockSubmissions,
+      mockContests,
+      mockFriends,
+      mockLeaderboard,
+    }) => {
+      setProblems(mockProblems);
+      setSubmissions(mockSubmissions);
+      setContests(mockContests);
+      setFriends(mockFriends);
+      setLeaderboard(mockLeaderboard);
+      setIsDataLoading(false);
     });
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('cf_connect_auth');
-  };
-
+  }, []);
+  
   return (
-    <AuthContext.Provider
-      value={{ user, login, logout, isLoading: isAuthLoading }}
-    >
-      <DataContext.Provider
-        value={{
-          problems,
-          submissions,
-          contests,
-          users,
-          friends,
-          leaderboard,
-          isLoading: isDataLoading,
-        }}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-        >
-          {children}
-        </ThemeProvider>
-      </DataContext.Provider>
-    </AuthContext.Provider>
+    <DataContext.Provider value={{
+      problems,
+      submissions,
+      contests,
+      users,
+      friends,
+      leaderboard,
+      isLoading: isDataLoading,
+    }}>
+      {children}
+    </DataContext.Provider>
+  );
+};
+// Providers Component
+export function Providers({ children }: { children: ReactNode }) {
+  return (
+    <SessionProvider>
+      <AuthProvider>
+        <DataProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+            {children}
+          </ThemeProvider>
+        </DataProvider>
+      </AuthProvider>
+    </SessionProvider>
   );
 }
-
 // Custom hooks
 export const useAuth = () => {
   const context = useContext(AuthContext);

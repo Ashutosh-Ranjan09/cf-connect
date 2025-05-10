@@ -331,7 +331,7 @@ export const getRatingOverTime = (): { date: string; rating: number }[] => {
         new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
     );
 
-  let currentRating = 1500; // Starting rating
+  let currentRating = 0; // Starting rating
 
   return contestsWithRating.map((contest) => {
     if (contest.ratingDelta) {
@@ -349,12 +349,13 @@ export const getDifficultyBreakdown = (): {
   solved: number;
 }[] => {
   const ratingRanges = [
-    '800-999',
-    '1000-1199',
-    '1200-1399',
-    '1400-1599',
-    '1600-1799',
-    '1800-1999',
+    '800',
+    '900',
+    '1000',
+    '1100',
+    '1200',
+    '1300',
+    '1400',
     '2000-2199',
     '2200-2399',
     '2400-2599',
@@ -373,18 +374,18 @@ export const getDifficultyBreakdown = (): {
       const rating = problem.rating;
       let range: string;
 
-      if (rating < 1000) range = '800-999';
-      else if (rating < 1200) range = '1000-1199';
-      else if (rating < 1400) range = '1200-1399';
-      else if (rating < 1600) range = '1400-1599';
-      else if (rating < 1800) range = '1600-1799';
-      else if (rating < 2000) range = '1800-1999';
-      else if (rating < 2200) range = '2000-2199';
-      else if (rating < 2400) range = '2200-2399';
-      else if (rating < 2600) range = '2400-2599';
-      else if (rating < 2800) range = '2600-2799';
-      else if (rating < 3000) range = '2800-2999';
-      else if (rating < 3200) range = '3000-3199';
+      if (rating === 800) range = '800';
+      else if (rating === 900) range = '900';
+      else if (rating === 1000) range = '1000';
+      else if (rating === 1100) range = '1100';
+      else if (rating === 1200) range = '1200';
+      else if (rating === 1300) range = '1800';
+      else if (rating === 1400) range = '2000';
+      else if (rating === 2400) range = '2200';
+      else if (rating === 2600) range = '2400';
+      else if (rating === 2800) range = '2600';
+      else if (rating === 3000) range = '2800';
+      else if (rating === 3200) range = '3000';
       else range = '3200+';
 
       countsByRange.set(range, (countsByRange.get(range) || 0) + 1);
