@@ -1,3 +1,6 @@
+import UserModel from "@/models/User";
+import dbConnect from "./dbConnect";
+
 // lib/server-api.ts
 export async function fetchServerData(handle?: string) {
   try {
@@ -18,16 +21,23 @@ export async function fetchServerData(handle?: string) {
     const submissionsData = submissionsResponse.ok ? await submissionsResponse.json() : { result: [] };
     const contestsData = contestsResponse.ok ? await contestsResponse.json() : { result: [] };
     const pastContestData=pastContestResponse.ok ? await pastContestResponse.json():{result:[]}
-    
+    const profile=await fetch(`https://codeforces.com/api/user.info?handles=${handle}`,{next:{revalidate:1}});
+    await dbConnect();
+    const dbprofile=await UserModel.findOne({username:handle});
+    console.log(dbprofile);
+    const profileData=profile.ok?await profile.json():{result:[]}
     // const contestsData=ctData.slice(0,50);
+    const profileData2={...profileData.result[0],aboutMe:dbprofile?.aboutme,websites:dbprofile?.links}
+    const arrProfileData=[profileData2];
     console.log("raw-submission-server-api.ts= ",contestsData);
     return {
       rawSubmissions: submissionsData.result || [],
       rawContests: contestsData.result || [],
       rawPastContestData:pastContestData.result||[],
+      rawProfileData:arrProfileData||[],
     };
   } catch (error) {
     console.log('Error fetching server data:', error);
-    return { rawSubmissions: [], rawContests: [],rawPastContestData:[] };
+    return { rawSubmissions: [], rawContests: [],rawPastContestData:[] ,rawProfileData:[]};
   }
 }

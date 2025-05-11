@@ -149,14 +149,21 @@ export function formatVerdict(verdict: string): {
 
 // Format memory usage
 export function formatMemory(bytes: number): string {
-  if (bytes < 1024) return `${bytes} KB`;
+  if (bytes === undefined || bytes === null || isNaN(bytes)) {
+    return '0 KB';
+  }
+  if (bytes < 1024) return `${Math.round(bytes)} KB`;
   return `${(bytes / 1024).toFixed(1)} MB`;
 }
 
 // Format time
 export function formatTime(ms: number): string {
-  return `${ms} ms`;
+   if (ms === undefined || ms === null || isNaN(ms)) {
+    return '0 ms';
+  }
+  return `${Math.round(ms)} ms`;
 }
+
 
 // Get chart colors
 export function getChartColors(theme: 'dark' | 'light'): string[] {

@@ -28,6 +28,7 @@ interface DataProviderProps{
     rawSubmissions:any[];
     rawContests:any[];
     rawPastContestData?:any[];
+    rawProfileData:any[],
   }
 }
 type AuthContextType = {
@@ -59,6 +60,7 @@ type DataContextType = {
   pastContest:any[];
   leaderboard: LeaderboardEntry[];
   isLoading: boolean;
+  profileData:any[],
 };
 
 export type Problem = {
@@ -143,12 +145,13 @@ const AuthProvider=({children}:{children:ReactNode})=>{
         // Use fetch to access the session data
         const response = await fetch('/api/auth/session');
         const session = await response.json();
-        
+        console.log(session);
+
         if (session && session.user) {
           setUser({
             ...defaultUser,
-            handle: session.user.name || 'user',
-            email: session.user.email || 'user@example.com',
+            handle: session.user.username || 'guest',
+            // email: session.user.email || 'user@example.com',
             isAuthenticated: true,
           });
         } else {
@@ -188,8 +191,8 @@ const AuthProvider=({children}:{children:ReactNode})=>{
       if (sessionData && sessionData.user) {
         setUser({
           ...defaultUser,
-          handle: sessionData.user.name || 'user',
-          email: sessionData.user.email || 'user@example.com',
+          handle: handle ,
+          // email: sessionData.user.email || 'user@example.com',
           isAuthenticated: true,
         });
         setIsAuthLoading(false);
@@ -249,6 +252,7 @@ const DataProvider = ({ children,serverData }: DataProviderProps) => {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [pastContest,setPastContest]=useState<any>([]);
+  const [profileData,setProfileData]=useState<any>([]);
   // Load mock data
   useEffect(() => {
     
@@ -264,14 +268,15 @@ const DataProvider = ({ children,serverData }: DataProviderProps) => {
       setProblems(transformProblems(serverData.rawSubmissions));
       // console.log(serverData.rawSubmissions);
       setSubmissions(transformSubmissions(serverData.rawSubmissions));
-      console.log(serverData.rawContests);
-      console.log("AR->",serverData);
+      // console.log(serverData.rawContests);
+      // console.log("AR->",serverData);
       setContests(serverData.rawContests);
       setFriends(mockFriends);
       setLeaderboard(mockLeaderboard);
       setIsDataLoading(false);
       // console.log(serverData.rawPastContestData);
       setPastContest(serverData.rawPastContestData);
+      setProfileData(serverData.rawProfileData);
     });
   }
   else
@@ -303,6 +308,7 @@ const DataProvider = ({ children,serverData }: DataProviderProps) => {
       leaderboard,
       pastContest,
       isLoading: isDataLoading,
+      profileData,
     }}>
       {children}
     </DataContext.Provider>
