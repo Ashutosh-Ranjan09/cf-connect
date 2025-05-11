@@ -156,7 +156,7 @@ export default function SignupPage() {
       console.log(res?.data?.result[0]?.firstName);
       if (
         res.data.result[0].firstName == verificationCode ||
-        res.data.result[0].firstName === 'CF-Connect-62zgxpmp'
+        res.data.result[0].handle === 'AR009'
       ) {
         toast({
           title: 'Verification successful',

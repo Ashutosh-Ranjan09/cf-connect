@@ -13,6 +13,7 @@ import {
 import { Card } from '@/components/ui/card';
 import { getTagDistribution } from '@/lib/mockData';
 import { getChartColors } from '@/lib/utils';
+import { useCodeforcesData } from '@/app/providers';
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -39,6 +40,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 };
 
 export const TagDistributionChart = () => {
+  const{problems}=useCodeforcesData();
   const [data, setData] = useState<Array<{ name: string; value: number }>>([]);
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
@@ -48,7 +50,7 @@ export const TagDistributionChart = () => {
 
   useEffect(() => {
     setMounted(true);
-    setData(getTagDistribution());
+    setData(getTagDistribution(problems));
   }, []);
 
   if (!mounted) {

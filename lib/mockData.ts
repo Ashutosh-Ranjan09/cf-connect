@@ -6,6 +6,13 @@ import {
   LeaderboardEntry,
 } from '@/app/providers';
 
+
+
+
+
+
+
+
 // Tags from CodeForces
 const problemTags = [
   'implementation',
@@ -173,18 +180,15 @@ export const mockContests: Contest[] = Array.from({ length: 20 }, (_, i) => {
   ];
 
   return {
-    id: `c${i + 1}`,
+    id: i + 1,
     name: `Codeforces Round #${800 + i} (${types[i % types.length]})`,
-    startTime: isUpcoming
-      ? new Date(Date.now() + (i + 1) * 24 * 60 * 60 * 1000).toISOString()
-      : randomDate(200, 10),
-    duration: [90, 120, 135, 150, 180][Math.floor(Math.random() * 5)],
-    type: types[i % types.length],
+    
+    type: `${types[i % types.length]}`,
     phase,
-    rsvp: Math.random() > 0.5,
-    ratingDelta: !isUpcoming
-      ? Math.floor(Math.random() * 200) - 100
-      : undefined,
+    frozen:false,
+    durationSeconds:0,
+    startTimeSeconds:0,
+    relativeTimeSeconds:0,
   };
 });
 
@@ -301,7 +305,7 @@ mockLeaderboard.forEach((entry, i) => {
 });
 
 // Generate distribution data for charts
-export const getTagDistribution = (): { name: string; value: number }[] => {
+export const getTagDistribution = (mockProblems:Problem[]): { name: string; value: number }[] => {
   const tagCounts = new Map<string, number>();
 
   // Count the occurrences of each tag in solved problems
@@ -320,31 +324,19 @@ export const getTagDistribution = (): { name: string; value: number }[] => {
     .slice(0, 10); // Keep only top 10 tags
 };
 
-export const getRatingOverTime = (): { date: string; rating: number }[] => {
-  const contestsWithRating = [...mockContests]
-    .filter(
-      (contest) =>
-        contest.phase === 'FINISHED' && contest.ratingDelta !== undefined
-    )
-    .sort(
-      (a, b) =>
-        new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
-    );
-
-  let currentRating = 0; // Starting rating
-
-  return contestsWithRating.map((contest) => {
-    if (contest.ratingDelta) {
-      currentRating += contest.ratingDelta;
-    }
+export const getRatingOverTime = (contests:any[]): { date: string; rating: number,contestName:string,rank:number }[] => {
+  return contests.map((contest) => {
+  
     return {
-      date: new Date(contest.startTime).toLocaleDateString(),
-      rating: currentRating,
+      date: new Date(contest.ratingUpdateTimeSeconds * 1000).toLocaleDateString(),
+      rating: contest.newRating,
+      contestName:contest.contestName,
+      rank:contest.rank,
     };
   });
 };
 
-export const getDifficultyBreakdown = (): {
+export const getDifficultyBreakdown = (problems:Problem[]): {
   rating: string;
   solved: number;
 }[] => {
@@ -356,19 +348,22 @@ export const getDifficultyBreakdown = (): {
     '1200',
     '1300',
     '1400',
-    '2000-2199',
-    '2200-2399',
-    '2400-2599',
-    '2600-2799',
-    '2800-2999',
-    '3000-3199',
-    '3200+',
+    '1500',
+    '1600',
+    '1700',
+    '1800',
+    '1900',
+    '2000',
+    '2100',
+    '2200',
+    '2300',
+    // '1400',
   ];
 
   const countsByRange = new Map<string, number>();
   ratingRanges.forEach((range) => countsByRange.set(range, 0));
 
-  mockProblems
+  problems
     .filter((problem) => problem.solved)
     .forEach((problem) => {
       const rating = problem.rating;
@@ -379,13 +374,20 @@ export const getDifficultyBreakdown = (): {
       else if (rating === 1000) range = '1000';
       else if (rating === 1100) range = '1100';
       else if (rating === 1200) range = '1200';
-      else if (rating === 1300) range = '1800';
-      else if (rating === 1400) range = '2000';
-      else if (rating === 2400) range = '2200';
-      else if (rating === 2600) range = '2400';
-      else if (rating === 2800) range = '2600';
-      else if (rating === 3000) range = '2800';
-      else if (rating === 3200) range = '3000';
+      else if (rating === 1300) range = '1300';
+      else if (rating === 1400) range = '1400';
+      else if (rating === 1500) range = '1500';
+      else if (rating === 1600) range = '1600';
+      else if (rating === 1700) range = '1700';
+      else if (rating === 1800) range = '1800';
+      else if (rating === 1900) range = '1900';
+      else if (rating === 2000) range = '2000';
+      else if (rating === 2100) range = '2100';
+      else if (rating === 2200) range = '2200';
+      else if (rating === 2300) range = '2300';
+      // else if (rating === 1700) range = '1700';
+      // else if (rating === 1800) range = '1800';
+      // else if (rating === 1900) range = '1900';
       else range = '3200+';
 
       countsByRange.set(range, (countsByRange.get(range) || 0) + 1);
@@ -396,3 +398,35 @@ export const getDifficultyBreakdown = (): {
     solved: countsByRange.get(rating) || 0,
   }));
 };
+export function transformSubmissions(rawSubmissions: any[]): Submission[] {
+  console.log("tranformSubmission",rawSubmissions);
+  if (!rawSubmissions?.length) return mockSubmissions;
+  console.log("raw sent");
+  return rawSubmissions.map(sub => ({
+    id: sub.id.toString(),
+    problemId: `${sub?.problem?.contestId}${sub?.problem?.index}`,
+    problemName: sub.problem.name,
+    verdict: sub.verdict || 'UNKNOWN',
+    language: sub.programmingLanguage,
+    timeSubmitted: new Date(sub.creationTimeSeconds * 1000).toISOString(),
+    executionTime: sub.timeConsumedMillis || 0,
+    memoryUsed: (sub.memoryConsumedBytes / 1024) || 0,
+    contestId: sub.contestId?.toString(),
+    rating: sub.problem.rating || 0,
+  }));
+}
+
+export function transformProblems(rawSubmissions: any[]): Problem[] {
+  console.log("tranformSubmission",rawSubmissions);
+  if (!rawSubmissions?.length) return mockProblems;
+  console.log("raw sent-problems");
+  return rawSubmissions.map(sub => ({
+    id: `${sub?.problem?.contestId}${sub?.problem?.index}`,
+    name:sub.problem.name,
+    rating:sub.problem.rating,
+    tags:sub.problem.tags,
+    solved:(sub.verdict==="OK"),
+    contestId:sub.problem.contestId.toString(),
+    index:sub.problem.index,
+    
+  }));}

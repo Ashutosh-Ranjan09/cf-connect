@@ -7,12 +7,12 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from './../../hooks/use-toast';
+import Link from 'next/link';
 import {
   CalendarDays,
   Clock,
@@ -25,10 +25,26 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Minus,
+  ExternalLink,
+  EthernetPort,
 } from 'lucide-react';
-import { useCodeforcesData, Contest } from '@/app/providers';
+import { useCodeforcesData } from '@/app/providers';
 import { formatContestTime, timeUntilContest } from '@/lib/utils';
 import { AppShell } from '@/components/layout/app-shell';
+
+// Define the Contest interface based on the provided sample
+interface Contest {
+  id: number;
+  name: string;
+  type: string;
+  phase: string;
+  frozen: boolean;
+  durationSeconds: number;
+  startTimeSeconds: number;
+  relativeTimeSeconds: number;
+  rsvp?: boolean;
+  ratingDelta?: number;
+}
 
 export default function ContestsPage() {
   const { contests, isLoading } = useCodeforcesData();
@@ -38,7 +54,10 @@ export default function ContestsPage() {
   const [ongoingContests, setOngoingContests] = useState<Contest[]>([]);
   const [pastContests, setPastContests] = useState<Contest[]>([]);
   const [localContests, setLocalContests] = useState<Contest[]>([]);
-
+  console.log(contests);
+    const getContestUrl = (contestId: number) => {
+  return `https://codeforces.com/contest/${contestId}`;
+};
   // Handle hydration mismatch
   useEffect(() => {
     setMounted(true);
@@ -46,7 +65,8 @@ export default function ContestsPage() {
 
   // Set initial data
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && contests && Array.isArray(contests)) {
+      console.log("Setting contests data:", contests);
       setLocalContests(contests);
 
       // Filter upcoming, ongoing, and past contests
@@ -59,36 +79,38 @@ export default function ContestsPage() {
             c.phase === 'SYSTEM_TEST'
         )
       );
-      setPastContests(contests.filter((c) => c.phase === 'FINISHED'));
+      setPastContests(contests.filter((c) => c.phase === 'FINISHED').sort((a,b)=>b.startTimeSeconds-a.startTimeSeconds).slice(0,10));
+    } else {
+      console.log("No contests data available or invalid format");
     }
   }, [isLoading, contests]);
 
   // RSVP handler
-  const toggleRSVP = (contestId: string) => {
-    setLocalContests((prev) =>
-      prev.map((contest) =>
-        contest.id === contestId ? { ...contest, rsvp: !contest.rsvp } : contest
-      )
-    );
+  // const toggleRSVP = (contestId: number) => {
+  //   setLocalContests((prev) =>
+  //     prev.map((contest) =>
+  //       contest.id === contestId ? { ...contest, rsvp: !contest.rsvp } : contest
+  //     )
+  //   );
 
-    // Also update the filtered lists
-    setUpcomingContests((prev) =>
-      prev.map((contest) =>
-        contest.id === contestId ? { ...contest, rsvp: !contest.rsvp } : contest
-      )
-    );
+  //   // Also update the filtered lists
+  //   setUpcomingContests((prev) =>
+  //     prev.map((contest) =>
+  //       contest.id === contestId ? { ...contest, rsvp: !contest.rsvp } : contest
+  //     )
+  //   );
 
-    const contest = localContests.find((c) => c.id === contestId);
-    if (contest) {
-      toast({
-        title: contest.rsvp ? 'RSVP Removed' : 'RSVP Added',
-        description: contest.rsvp
-          ? `You will no longer be reminded about ${contest.name}`
-          : `You will be reminded about ${contest.name}`,
-        duration: 3000,
-      });
-    }
-  };
+  //   const contest = localContests.find((c) => c.id === contestId);
+  //   if (contest) {
+  //     toast({
+  //       title: contest.rsvp ? 'RSVP Removed' : 'RSVP Added',
+  //       description: contest.rsvp
+  //         ? `You will no longer be reminded about ${contest.name}`
+  //         : `You will be reminded about ${contest.name}`,
+  //       duration: 3000,
+  //     });
+  //   }
+  // };
 
   // Render contest phase badge
   const renderPhaseBadge = (phase: Contest['phase']) => {
@@ -156,6 +178,11 @@ export default function ContestsPage() {
     }
   };
 
+  // Format duration in minutes
+  const formatDuration = (durationSeconds: number) => {
+    return Math.floor(durationSeconds / 60);
+  };
+
   if (!mounted || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -166,7 +193,7 @@ export default function ContestsPage() {
 
   return (
     <AppShell>
-      <div className="container mx-auto py-3 sm:py-4 md:py-6 px-2 sm:px-4">
+      <div className="container mx-auto py-3 sm:py-4 md:py-6 px-2 sm:px-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
         <div className="space-y-3 sm:space-y-4 md:space-y-6">
           <Card>
             <CardHeader className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2 sm:pb-3">
@@ -186,12 +213,12 @@ export default function ContestsPage() {
                   >
                     Upcoming
                   </TabsTrigger>
-                  <TabsTrigger
+                  {/* <TabsTrigger
                     value="ongoing"
                     className="flex-1 text-xs sm:text-sm"
                   >
                     Ongoing
-                  </TabsTrigger>
+                  </TabsTrigger> */}
                   <TabsTrigger
                     value="past"
                     className="flex-1 text-xs sm:text-sm"
@@ -218,9 +245,12 @@ export default function ContestsPage() {
                           <div className="p-3 sm:p-4 md:p-6 flex-1">
                             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-3">
                               <div>
+                                <Link href={`https://codeforces.com/contests`} target='_blank' className="hover:underline">
                                 <h3 className="text-sm sm:text-base md:text-lg font-semibold line-clamp-2">
                                   {contest.name}
+                                  <ExternalLink className="ml-1 h-3 w-3 inline opacity-70"/>
                                 </h3>
+                                </Link>
                                 <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-1">
                                   {renderPhaseBadge(contest.phase)}
                                   <Badge
@@ -231,7 +261,7 @@ export default function ContestsPage() {
                                   </Badge>
                                 </div>
                               </div>
-                              <Button
+                              {/* <Button
                                 className="self-start"
                                 variant={contest.rsvp ? 'default' : 'outline'}
                                 size="sm"
@@ -245,19 +275,19 @@ export default function ContestsPage() {
                                 ) : (
                                   'RSVP'
                                 )}
-                              </Button>
+                              </Button> */}
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mt-4">
                               <div className="flex items-center gap-2">
                                 <CalendarDays className="h-4 w-4 text-muted-foreground" />
                                 <span>
-                                  {formatContestTime(contest.startTime)}
+                                  {formatContestTime(new Date(contest.startTimeSeconds * 1000).toISOString())}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4 text-muted-foreground" />
-                                <span>{contest.duration} minutes</span>
+                                <span>{formatDuration(contest.durationSeconds)} minutes</span>
                               </div>
                             </div>
                           </div>
@@ -269,7 +299,7 @@ export default function ContestsPage() {
                                 Starts in
                               </p>
                               <p className="text-xl font-bold">
-                                {timeUntilContest(contest.startTime)}
+                                {timeUntilContest(new Date(contest.startTimeSeconds * 1000).toISOString())}
                               </p>
                             </div>
                           </div>
@@ -279,7 +309,7 @@ export default function ContestsPage() {
                   )}
                 </TabsContent>
 
-                <TabsContent value="ongoing" className="space-y-4">
+                 {/* <TabsContent value="ongoing" className="space-y-4">
                   {ongoingContests.length === 0 ? (
                     <div className="text-center py-12">
                       <Clock className="h-12 w-12 mx-auto text-muted-foreground opacity-50" />
@@ -324,12 +354,12 @@ export default function ContestsPage() {
                               <div className="flex items-center gap-2">
                                 <CalendarDays className="h-4 w-4 text-muted-foreground" />
                                 <span>
-                                  {formatContestTime(contest.startTime)}
+                                  {formatContestTime(new Date(contest.startTimeSeconds * 1000).toISOString())}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4 text-muted-foreground" />
-                                <span>{contest.duration} minutes</span>
+                                <span>{formatDuration(contest.durationSeconds)} minutes</span>
                               </div>
                             </div>
                           </div>
@@ -349,7 +379,7 @@ export default function ContestsPage() {
                       </Card>
                     ))
                   )}
-                </TabsContent>
+                </TabsContent> */}
 
                 <TabsContent value="past" className="space-y-4">
                   {pastContests.length === 0 ? (
@@ -369,9 +399,12 @@ export default function ContestsPage() {
                           <div className="p-3 sm:p-4 md:p-6 flex-1">
                             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-3">
                               <div>
+                                <Link href={getContestUrl(contest.id)} target='_blank' className="hover:underline">
                                 <h3 className="text-sm sm:text-base md:text-lg font-semibold line-clamp-2">
                                   {contest.name}
+                                  <ExternalLink className="ml-1 h-3 w-3 inline opacity-70"/>
                                 </h3>
+                                </Link>
                                 <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-1">
                                   {renderPhaseBadge(contest.phase)}
                                   <Badge
@@ -382,27 +415,27 @@ export default function ContestsPage() {
                                   </Badge>
                                 </div>
                               </div>
-                              <Button variant="outline" size="sm">
+                              {/* <Button variant="outline" size="sm">
                                 <BarChart className="h-4 w-4 mr-1" />
                                 Analysis
-                              </Button>
+                              </Button> */}
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mt-4">
                               <div className="flex items-center gap-2">
                                 <CalendarDays className="h-4 w-4 text-muted-foreground" />
                                 <span>
-                                  {formatContestTime(contest.startTime)}
+                                  {formatContestTime(new Date(contest.startTimeSeconds * 1000).toISOString())}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4 text-muted-foreground" />
-                                <span>{contest.duration} minutes</span>
+                                <span>{formatDuration(contest.durationSeconds)} minutes</span>
                               </div>
                             </div>
                           </div>
 
-                          <div className="bg-muted p-4 sm:p-6 flex flex-row md:flex-col items-center justify-between md:w-48">
+                          {/* <div className="bg-muted p-4 sm:p-6 flex flex-row md:flex-col items-center justify-between md:w-48">
                             <div className="text-center">
                               <p className="text-sm text-muted-foreground">
                                 Rating Change
@@ -411,7 +444,7 @@ export default function ContestsPage() {
                                 {renderDelta(contest.ratingDelta)}
                               </div>
                             </div>
-                          </div>
+                          </div> */}
                         </div>
                       </Card>
                     ))

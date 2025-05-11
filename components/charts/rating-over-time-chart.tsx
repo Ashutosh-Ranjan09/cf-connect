@@ -16,16 +16,19 @@ import {
 import { Card } from '@/components/ui/card';
 import { getRatingOverTime } from '@/lib/mockData';
 import { getChartColors, getRatingColor } from '@/lib/utils';
+import { useCodeforcesData } from '@/app/providers';
 
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: Array<{ value: number }>;
+  payload?: Array<{ value: number;datKey:string;payload:any }>;
   label?: string;
 }
 
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const rating = payload[0].value;
+     const contestName = payload[0].payload.contestName;
+    const rank = payload[0].payload.rank;
     const colorClass = getRatingColor(rating)
       .replace('text-', 'text-')
       .split(' ')[0];
@@ -34,6 +37,8 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
       <Card className="bg-card/95 backdrop-blur-sm p-3 border shadow-md">
         <p className="text-sm font-medium">{label}</p>
         <p className={`text-sm ${colorClass} font-medium`}>Rating: {rating}</p>
+        <p className="text-sm font-medium">Contest: {contestName}</p>
+        <p className="text-sm font-medium">Rank: {rank}</p>
       </Card>
     );
   }
@@ -41,7 +46,8 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 };
 
 export const RatingOverTimeChart = () => {
-  const [data, setData] = useState<Array<{ date: string; rating: number }>>([]);
+  const {pastContest}=useCodeforcesData();
+  const [data, setData] = useState<Array<{ date: string; rating: number ;contestName:string;rank:number}>>([]);
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
   const chartColors = getChartColors(
@@ -63,8 +69,9 @@ export const RatingOverTimeChart = () => {
 
   useEffect(() => {
     setMounted(true);
-    setData(getRatingOverTime());
-  }, []);
+    console.log(pastContest);
+    setData(getRatingOverTime(pastContest));
+  }, [pastContest]);
 
   if (!mounted) {
     return (

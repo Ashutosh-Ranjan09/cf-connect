@@ -55,7 +55,7 @@ export default function DashboardPage() {
 
   // Calculate stats
   useEffect(() => {
-    if (!isLoading && submissions.length > 0) {
+    if (!isLoading && submissions?.length > 0) {
       const accepted = submissions.filter((s) => s.verdict === 'OK');
       const uniqueProblems = new Set(accepted.map((s) => s.problemId));
 

@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { getDifficultyBreakdown } from '@/lib/mockData';
+import { useCodeforcesData } from '@/app/providers';
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -42,18 +43,28 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 const getDifficultyColor = (rating: string): string => {
   const lowerBound = parseInt(rating.split('-')[0]);
 
-  if (lowerBound < 1200) return '#cccccc';
-  if (lowerBound < 1400) return '#77ff77';
-  if (lowerBound < 1600) return '#77ddbb';
-  if (lowerBound < 1900) return '#aaaaff';
-  if (lowerBound < 2100) return '#ff88ff';
-  if (lowerBound < 2400) return '#ffcc88';
-  if (lowerBound < 2600) return '#ff7777';
-  if (lowerBound < 3000) return '#ff3333';
+  if (lowerBound === 800) return '#cccccc';
+  if (lowerBound ===900) return '#77ff77';
+  if (lowerBound === 1000) return '#77ddbb';
+  if (lowerBound === 1100) return '#aaaaff';
+  if (lowerBound === 1200) return '#ff88ff';
+  if (lowerBound === 1300) return '#ffcc88';
+  if (lowerBound === 1400) return '#ff7777';
+  if (lowerBound === 1500) return '#ff3333';
+  if (lowerBound === 1600) return '#cccccc';
+  if (lowerBound === 1700) return '#77ff77';
+  if (lowerBound === 1800) return '#77ddbb';
+  if (lowerBound === 1900) return '#aaaaff';
+  if (lowerBound === 2000) return '#ff88ff';
+  if (lowerBound === 2100) return '#ffcc88';
+  if (lowerBound === 2200) return '#ff7777';
+  if (lowerBound === 2300) return '#ff3333';
   return '#aa0000';
 };
 
 export const DifficultyBreakdownChart = () => {
+  const {problems}=useCodeforcesData();
+  console.log(problems);
   const [data, setData] = useState<Array<{ rating: string; solved: number }>>(
     []
   );
@@ -62,7 +73,7 @@ export const DifficultyBreakdownChart = () => {
 
   useEffect(() => {
     setMounted(true);
-    setData(getDifficultyBreakdown());
+    setData(getDifficultyBreakdown(problems));
   }, []);
 
   if (!mounted) {

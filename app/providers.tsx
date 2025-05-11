@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { ThemeProvider } from 'next-themes';
 import axios from 'axios';
+import { mockSubmissions, transformSubmissions ,transformProblems} from "@/lib/mockData";
 
 // Auth Context
 type User = {
@@ -21,7 +22,14 @@ type User = {
   rank: string;
   isAuthenticated: boolean;
 };
-
+interface DataProviderProps{
+  children:ReactNode;
+  serverData:{
+    rawSubmissions:any[];
+    rawContests:any[];
+    rawPastContestData?:any[];
+  }
+}
 type AuthContextType = {
   user: User | null;
   login: (handle: string, password: string) => Promise<boolean>;
@@ -48,6 +56,7 @@ type DataContextType = {
   contests: Contest[];
   users: User[];
   friends: Friend[];
+  pastContest:any[];
   leaderboard: LeaderboardEntry[];
   isLoading: boolean;
 };
@@ -82,19 +91,16 @@ export type Submission = {
 };
 
 export type Contest = {
-  id: string;
+  id: number;
   name: string;
-  startTime: string;
-  duration: number; // in minutes
-  type: 'Div. 1' | 'Div. 2' | 'Div. 3' | 'Div. 4' | 'Educational' | 'Global';
-  phase:
-    | 'BEFORE'
-    | 'CODING'
-    | 'PENDING_SYSTEM_TEST'
-    | 'SYSTEM_TEST'
-    | 'FINISHED';
-  rsvp: boolean;
-  ratingDelta?: number;
+  type: string;
+  phase:string;
+  frozen:boolean;
+  durationSeconds:number,
+  startTimeSeconds:number,
+  relativeTimeSeconds:number,
+  // rsvp: boolean;
+  // ratingDelta?: number;
 };
 
 export type Friend = {
@@ -234,7 +240,7 @@ const AuthProvider=({children}:{children:ReactNode})=>{
     </AuthContext.Provider>
   );
 }
-const DataProvider = ({ children }: { children: ReactNode }) => {
+const DataProvider = ({ children,serverData }: DataProviderProps) => {
   const [isDataLoading, setIsDataLoading] = useState<boolean>(true);
   const [problems, setProblems] = useState<Problem[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -242,9 +248,34 @@ const DataProvider = ({ children }: { children: ReactNode }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  
+  const [pastContest,setPastContest]=useState<any>([]);
   // Load mock data
   useEffect(() => {
+    
+    if(serverData?.rawSubmissions?.length || serverData?.rawContests?.length)
+    {
+      import('@/lib/mockData').then(({
+      mockProblems,
+      mockSubmissions,
+      mockContests,
+      mockFriends,
+      mockLeaderboard,
+    }) => {
+      setProblems(transformProblems(serverData.rawSubmissions));
+      // console.log(serverData.rawSubmissions);
+      setSubmissions(transformSubmissions(serverData.rawSubmissions));
+      console.log(serverData.rawContests);
+      console.log("AR->",serverData);
+      setContests(serverData.rawContests);
+      setFriends(mockFriends);
+      setLeaderboard(mockLeaderboard);
+      setIsDataLoading(false);
+      // console.log(serverData.rawPastContestData);
+      setPastContest(serverData.rawPastContestData);
+    });
+  }
+  else
+  {
     import('@/lib/mockData').then(({
       mockProblems,
       mockSubmissions,
@@ -259,7 +290,8 @@ const DataProvider = ({ children }: { children: ReactNode }) => {
       setLeaderboard(mockLeaderboard);
       setIsDataLoading(false);
     });
-  }, []);
+  }
+  }, [serverData]);
   
   return (
     <DataContext.Provider value={{
@@ -269,6 +301,7 @@ const DataProvider = ({ children }: { children: ReactNode }) => {
       users,
       friends,
       leaderboard,
+      pastContest,
       isLoading: isDataLoading,
     }}>
       {children}
@@ -276,11 +309,11 @@ const DataProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 // Providers Component
-export function Providers({ children }: { children: ReactNode }) {
+export function Providers({ children,serverData }: DataProviderProps) {
   return (
     <SessionProvider>
       <AuthProvider>
-        <DataProvider>
+        <DataProvider serverData={serverData}>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
             {children}
           </ThemeProvider>
