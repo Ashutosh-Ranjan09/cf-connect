@@ -158,12 +158,11 @@ export function formatMemory(bytes: number): string {
 
 // Format time
 export function formatTime(ms: number): string {
-   if (ms === undefined || ms === null || isNaN(ms)) {
+  if (ms === undefined || ms === null || isNaN(ms)) {
     return '0 ms';
   }
   return `${Math.round(ms)} ms`;
 }
-
 
 // Get chart colors
 export function getChartColors(theme: 'dark' | 'light'): string[] {

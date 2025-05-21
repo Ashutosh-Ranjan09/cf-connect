@@ -17,18 +17,18 @@ export const AppShell = ({ children }: AppShellProps) => {
   const { status: sessionStatus } = useSession();
   const pathname = usePathname();
   const [isMounted, setIsMounted] = useState(false);
-  
+
   // Public paths that don't require authentication
   const publicPaths = ['/', '/login', '/signup', '/forgot-password'];
 
   // Check if current path is public
   const isPublicPath = publicPaths.includes(pathname);
-  
+
   // Set isMounted to true after component mounts
   useEffect(() => {
     setIsMounted(true);
   }, []);
-  
+
   // Handle redirects - MOVED UP before any conditional returns
   useEffect(() => {
     if (isMounted && !authContextLoading) {
@@ -36,16 +36,26 @@ export const AppShell = ({ children }: AppShellProps) => {
       if (sessionStatus === 'unauthenticated' && !isPublicPath) {
         router.push('/login');
       }
-      
+
       // Redirect to dashboard if authenticated and trying to access public route
-      if (sessionStatus === 'authenticated' && (pathname === '/login' || pathname === '/signup')) {
+      if (
+        sessionStatus === 'authenticated' &&
+        (pathname === '/login' || pathname === '/signup')
+      ) {
         router.push('/dashboard');
       }
     }
-  }, [isMounted, sessionStatus, authContextLoading, isPublicPath, pathname, router]);
+  }, [
+    isMounted,
+    sessionStatus,
+    authContextLoading,
+    isPublicPath,
+    pathname,
+    router,
+  ]);
 
   // Don't render until mounted and authentication state is determined
-  if (!isMounted || (sessionStatus === 'loading' || authContextLoading)) {
+  if (!isMounted || sessionStatus === 'loading' || authContextLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>

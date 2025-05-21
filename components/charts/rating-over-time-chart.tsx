@@ -20,14 +20,14 @@ import { useCodeforcesData } from '@/app/providers';
 
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: Array<{ value: number;datKey:string;payload:any }>;
+  payload?: Array<{ value: number; datKey: string; payload: any }>;
   label?: string;
 }
 
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const rating = payload[0].value;
-     const contestName = payload[0].payload.contestName;
+    const contestName = payload[0].payload.contestName;
     const rank = payload[0].payload.rank;
     const colorClass = getRatingColor(rating)
       .replace('text-', 'text-')
@@ -46,8 +46,10 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 };
 
 export const RatingOverTimeChart = () => {
-  const {pastContest}=useCodeforcesData();
-  const [data, setData] = useState<Array<{ date: string; rating: number ;contestName:string;rank:number}>>([]);
+  const { pastContest } = useCodeforcesData();
+  const [data, setData] = useState<
+    Array<{ date: string; rating: number; contestName: string; rank: number }>
+  >([]);
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
   const chartColors = getChartColors(
@@ -69,7 +71,7 @@ export const RatingOverTimeChart = () => {
 
   useEffect(() => {
     setMounted(true);
-    console.log(pastContest);
+    // console.log(pastContest);
     setData(getRatingOverTime(pastContest));
   }, [pastContest]);
 

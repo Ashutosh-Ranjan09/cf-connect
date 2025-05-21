@@ -1,7 +1,7 @@
 'use client';
-import { signIn, signOut, SessionProvider } from "next-auth/react";
+import { signIn, signOut, SessionProvider } from 'next-auth/react';
 
-import { getToken } from "next-auth/jwt";
+import { getToken } from 'next-auth/jwt';
 import {
   createContext,
   useState,
@@ -11,7 +11,12 @@ import {
 } from 'react';
 import { ThemeProvider } from 'next-themes';
 import axios from 'axios';
-import { mockSubmissions, transformSubmissions ,transformProblems} from "@/lib/mockData";
+import {
+  mockSubmissions,
+  transformSubmissions,
+  transformProblems,
+  transformFriends,
+} from '@/lib/mockData';
 
 // Auth Context
 type User = {
@@ -22,14 +27,15 @@ type User = {
   rank: string;
   isAuthenticated: boolean;
 };
-interface DataProviderProps{
-  children:ReactNode;
-  serverData:{
-    rawSubmissions:any[];
-    rawContests:any[];
-    rawPastContestData?:any[];
-    rawProfileData:any[],
-  }
+interface DataProviderProps {
+  children: ReactNode;
+  serverData: {
+    rawSubmissions: any[];
+    rawContests: any[];
+    rawPastContestData?: any[];
+    rawProfileData: any[];
+    rawFriends:any[];
+  };
 }
 type AuthContextType = {
   user: User | null;
@@ -57,10 +63,10 @@ type DataContextType = {
   contests: Contest[];
   users: User[];
   friends: Friend[];
-  pastContest:any[];
+  pastContest: any[];
   leaderboard: LeaderboardEntry[];
   isLoading: boolean;
-  profileData:any[],
+  profileData: any[];
 };
 
 export type Problem = {
@@ -96,11 +102,11 @@ export type Contest = {
   id: number;
   name: string;
   type: string;
-  phase:string;
-  frozen:boolean;
-  durationSeconds:number,
-  startTimeSeconds:number,
-  relativeTimeSeconds:number,
+  phase: string;
+  frozen: boolean;
+  durationSeconds: number;
+  startTimeSeconds: number;
+  relativeTimeSeconds: number;
   // rsvp: boolean;
   // ratingDelta?: number;
 };
@@ -111,6 +117,7 @@ export type Friend = {
   rank: string;
   avatar: string;
   isFollowing: boolean;
+  // isFollower?:boolean;
   lastSeen: string;
   recentActivity?: {
     type: 'SOLVED' | 'PARTICIPATED' | 'RANKED_UP';
@@ -134,10 +141,10 @@ export type LeaderboardEntry = {
 };
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
-const AuthProvider=({children}:{children:ReactNode})=>{
-    const [user, setUser] = useState<User | null>(null);
+const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
-  
+
   // Initialize user from session token
   useEffect(() => {
     const initializeUser = async () => {
@@ -145,7 +152,7 @@ const AuthProvider=({children}:{children:ReactNode})=>{
         // Use fetch to access the session data
         const response = await fetch('/api/auth/session');
         const session = await response.json();
-        console.log(session);
+        // console.log(session);
 
         if (session && session.user) {
           setUser({
@@ -164,7 +171,7 @@ const AuthProvider=({children}:{children:ReactNode})=>{
         setIsAuthLoading(false);
       }
     };
-    
+
     initializeUser();
   }, []);
   // 1. Login function
@@ -177,28 +184,28 @@ const AuthProvider=({children}:{children:ReactNode})=>{
         username: handle,
         password: password,
       });
-      
+
       if (response?.error) {
         console.error('Login failed: ', response.error);
         setIsAuthLoading(false);
         return false;
       }
-      
+
       // Refresh the session to get updated user data
       const sessionResponse = await fetch('/api/auth/session');
       const sessionData = await sessionResponse.json();
-      
+
       if (sessionData && sessionData.user) {
         setUser({
           ...defaultUser,
-          handle: handle ,
+          handle: handle,
           // email: sessionData.user.email || 'user@example.com',
           isAuthenticated: true,
         });
         setIsAuthLoading(false);
         return true;
       }
-      
+
       setIsAuthLoading(false);
       return false;
     } catch (error) {
@@ -207,7 +214,7 @@ const AuthProvider=({children}:{children:ReactNode})=>{
       return false;
     }
   };
-  
+
   // 2. Logout function
   const logout = async () => {
     try {
@@ -217,7 +224,7 @@ const AuthProvider=({children}:{children:ReactNode})=>{
       console.error('Logout error:', error);
     }
   };
-  
+
   // 3. Signup function
   const signup = async (handle: string, password: string): Promise<boolean> => {
     try {
@@ -225,9 +232,9 @@ const AuthProvider=({children}:{children:ReactNode})=>{
         username: handle,
         password,
       });
-      
+
       if (res.status === 201 && res.data.success === true) {
-        console.log('Signup success');
+        // console.log('Signup success');
         return true;
       } else {
         return false;
@@ -238,12 +245,14 @@ const AuthProvider=({children}:{children:ReactNode})=>{
     }
   };
   return (
-    <AuthContext.Provider value={{ user, login, logout, signup, isLoading: isAuthLoading }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, signup, isLoading: isAuthLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );
-}
-const DataProvider = ({ children,serverData }: DataProviderProps) => {
+};
+const DataProvider = ({ children, serverData }: DataProviderProps) => {
   const [isDataLoading, setIsDataLoading] = useState<boolean>(true);
   const [problems, setProblems] = useState<Problem[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -251,76 +260,82 @@ const DataProvider = ({ children,serverData }: DataProviderProps) => {
   const [users, setUsers] = useState<User[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [pastContest,setPastContest]=useState<any>([]);
-  const [profileData,setProfileData]=useState<any>([]);
+  const [pastContest, setPastContest] = useState<any>([]);
+  const [profileData, setProfileData] = useState<any>([]);
   // Load mock data
   useEffect(() => {
-    
-    if(serverData?.rawSubmissions?.length || serverData?.rawContests?.length)
-    {
-      import('@/lib/mockData').then(({
-      mockProblems,
-      mockSubmissions,
-      mockContests,
-      mockFriends,
-      mockLeaderboard,
-    }) => {
-      setProblems(transformProblems(serverData.rawSubmissions));
-      // console.log(serverData.rawSubmissions);
-      setSubmissions(transformSubmissions(serverData.rawSubmissions));
-      // console.log(serverData.rawContests);
-      // console.log("AR->",serverData);
-      setContests(serverData.rawContests);
-      setFriends(mockFriends);
-      setLeaderboard(mockLeaderboard);
-      setIsDataLoading(false);
-      // console.log(serverData.rawPastContestData);
-      setPastContest(serverData.rawPastContestData);
-      setProfileData(serverData.rawProfileData);
-    });
-  }
-  else
-  {
-    import('@/lib/mockData').then(({
-      mockProblems,
-      mockSubmissions,
-      mockContests,
-      mockFriends,
-      mockLeaderboard,
-    }) => {
-      setProblems(mockProblems);
-      setSubmissions(mockSubmissions);
-      setContests(mockContests);
-      setFriends(mockFriends);
-      setLeaderboard(mockLeaderboard);
-      setIsDataLoading(false);
-    });
-  }
+    if (serverData?.rawSubmissions?.length || serverData?.rawContests?.length) {
+      import('@/lib/mockData').then(
+        ({
+          mockProblems,
+          mockSubmissions,
+          mockContests,
+          mockFriends,
+          mockLeaderboard,
+        }) => {
+          setProblems(transformProblems(serverData.rawSubmissions));
+          // console.log(serverData.rawSubmissions);
+          setSubmissions(transformSubmissions(serverData.rawSubmissions));
+          // console.log(serverData.rawContests);
+          // console.log("AR->",serverData);
+          setContests(serverData.rawContests);
+          setFriends(serverData.rawFriends);
+          setLeaderboard(mockLeaderboard);
+          setIsDataLoading(false);
+          // console.log(serverData.rawPastContestData);
+          setPastContest(serverData.rawPastContestData);
+          setProfileData(serverData.rawProfileData);
+        }
+      );
+    } else {
+      import('@/lib/mockData').then(
+        ({
+          mockProblems,
+          mockSubmissions,
+          mockContests,
+          mockFriends,
+          mockLeaderboard,
+        }) => {
+          setProblems(mockProblems);
+          setSubmissions(mockSubmissions);
+          setContests(mockContests);
+          setFriends(mockFriends);
+          setLeaderboard(mockLeaderboard);
+          setIsDataLoading(false);
+        }
+      );
+    }
   }, [serverData]);
-  
+
   return (
-    <DataContext.Provider value={{
-      problems,
-      submissions,
-      contests,
-      users,
-      friends,
-      leaderboard,
-      pastContest,
-      isLoading: isDataLoading,
-      profileData,
-    }}>
+    <DataContext.Provider
+      value={{
+        problems,
+        submissions,
+        contests,
+        users,
+        friends,
+        leaderboard,
+        pastContest,
+        isLoading: isDataLoading,
+        profileData,
+      }}
+    >
       {children}
     </DataContext.Provider>
   );
 };
 // Providers Component
-export function Providers({ children,serverData }: DataProviderProps) {
+export function Providers({ children, serverData }: DataProviderProps) {
   return (
     <SessionProvider>
       <AuthProvider>
         <DataProvider serverData={serverData}>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem={false}
+          >
             {children}
           </ThemeProvider>
         </DataProvider>

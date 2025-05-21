@@ -54,10 +54,10 @@ export default function ContestsPage() {
   const [ongoingContests, setOngoingContests] = useState<Contest[]>([]);
   const [pastContests, setPastContests] = useState<Contest[]>([]);
   const [localContests, setLocalContests] = useState<Contest[]>([]);
-  console.log(contests);
-    const getContestUrl = (contestId: number) => {
-  return `https://codeforces.com/contest/${contestId}`;
-};
+  // console.log(contests);
+  const getContestUrl = (contestId: number) => {
+    return `https://codeforces.com/contest/${contestId}`;
+  };
   // Handle hydration mismatch
   useEffect(() => {
     setMounted(true);
@@ -66,7 +66,7 @@ export default function ContestsPage() {
   // Set initial data
   useEffect(() => {
     if (!isLoading && contests && Array.isArray(contests)) {
-      console.log("Setting contests data:", contests);
+      // console.log("Setting contests data:", contests);
       setLocalContests(contests);
 
       // Filter upcoming, ongoing, and past contests
@@ -79,9 +79,14 @@ export default function ContestsPage() {
             c.phase === 'SYSTEM_TEST'
         )
       );
-      setPastContests(contests.filter((c) => c.phase === 'FINISHED').sort((a,b)=>b.startTimeSeconds-a.startTimeSeconds).slice(0,10));
+      setPastContests(
+        contests
+          .filter((c) => c.phase === 'FINISHED')
+          .sort((a, b) => b.startTimeSeconds - a.startTimeSeconds)
+          .slice(0, 10)
+      );
     } else {
-      console.log("No contests data available or invalid format");
+      console.log('No contests data available or invalid format');
     }
   }, [isLoading, contests]);
 
@@ -245,11 +250,15 @@ export default function ContestsPage() {
                           <div className="p-3 sm:p-4 md:p-6 flex-1">
                             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-3">
                               <div>
-                                <Link href={`https://codeforces.com/contests`} target='_blank' className="hover:underline">
-                                <h3 className="text-sm sm:text-base md:text-lg font-semibold line-clamp-2">
-                                  {contest.name}
-                                  <ExternalLink className="ml-1 h-3 w-3 inline opacity-70"/>
-                                </h3>
+                                <Link
+                                  href={`https://codeforces.com/contests`}
+                                  target="_blank"
+                                  className="hover:underline"
+                                >
+                                  <h3 className="text-sm sm:text-base md:text-lg font-semibold line-clamp-2">
+                                    {contest.name}
+                                    <ExternalLink className="ml-1 h-3 w-3 inline opacity-70" />
+                                  </h3>
                                 </Link>
                                 <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-1">
                                   {renderPhaseBadge(contest.phase)}
@@ -282,12 +291,19 @@ export default function ContestsPage() {
                               <div className="flex items-center gap-2">
                                 <CalendarDays className="h-4 w-4 text-muted-foreground" />
                                 <span>
-                                  {formatContestTime(new Date(contest.startTimeSeconds * 1000).toISOString())}
+                                  {formatContestTime(
+                                    new Date(
+                                      contest.startTimeSeconds * 1000
+                                    ).toISOString()
+                                  )}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4 text-muted-foreground" />
-                                <span>{formatDuration(contest.durationSeconds)} minutes</span>
+                                <span>
+                                  {formatDuration(contest.durationSeconds)}{' '}
+                                  minutes
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -299,7 +315,11 @@ export default function ContestsPage() {
                                 Starts in
                               </p>
                               <p className="text-xl font-bold">
-                                {timeUntilContest(new Date(contest.startTimeSeconds * 1000).toISOString())}
+                                {timeUntilContest(
+                                  new Date(
+                                    contest.startTimeSeconds * 1000
+                                  ).toISOString()
+                                )}
                               </p>
                             </div>
                           </div>
@@ -309,7 +329,7 @@ export default function ContestsPage() {
                   )}
                 </TabsContent>
 
-                 {/* <TabsContent value="ongoing" className="space-y-4">
+                {/* <TabsContent value="ongoing" className="space-y-4">
                   {ongoingContests.length === 0 ? (
                     <div className="text-center py-12">
                       <Clock className="h-12 w-12 mx-auto text-muted-foreground opacity-50" />
@@ -399,11 +419,15 @@ export default function ContestsPage() {
                           <div className="p-3 sm:p-4 md:p-6 flex-1">
                             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-3">
                               <div>
-                                <Link href={getContestUrl(contest.id)} target='_blank' className="hover:underline">
-                                <h3 className="text-sm sm:text-base md:text-lg font-semibold line-clamp-2">
-                                  {contest.name}
-                                  <ExternalLink className="ml-1 h-3 w-3 inline opacity-70"/>
-                                </h3>
+                                <Link
+                                  href={getContestUrl(contest.id)}
+                                  target="_blank"
+                                  className="hover:underline"
+                                >
+                                  <h3 className="text-sm sm:text-base md:text-lg font-semibold line-clamp-2">
+                                    {contest.name}
+                                    <ExternalLink className="ml-1 h-3 w-3 inline opacity-70" />
+                                  </h3>
                                 </Link>
                                 <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-1">
                                   {renderPhaseBadge(contest.phase)}
@@ -425,12 +449,19 @@ export default function ContestsPage() {
                               <div className="flex items-center gap-2">
                                 <CalendarDays className="h-4 w-4 text-muted-foreground" />
                                 <span>
-                                  {formatContestTime(new Date(contest.startTimeSeconds * 1000).toISOString())}
+                                  {formatContestTime(
+                                    new Date(
+                                      contest.startTimeSeconds * 1000
+                                    ).toISOString()
+                                  )}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4 text-muted-foreground" />
-                                <span>{formatDuration(contest.durationSeconds)} minutes</span>
+                                <span>
+                                  {formatDuration(contest.durationSeconds)}{' '}
+                                  minutes
+                                </span>
                               </div>
                             </div>
                           </div>

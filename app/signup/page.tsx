@@ -111,7 +111,7 @@ export default function SignupPage() {
         const res = await axios.get(
           `https://codeforces.com/api/user.info?handles=${values.handle}`
         );
-        console.log(res);
+        // console.log(res);
         const code = generateVerificationCode();
         setVerificationCode(code);
         setHandle(values.handle);
@@ -151,9 +151,9 @@ export default function SignupPage() {
       const res = await axios.get(
         `https://codeforces.com/api/user.info?handles=${handle}`
       );
-      console.log(verificationCode);
-      console.log(typeof verificationCode, typeof res.data.result[0].firstName);
-      console.log(res?.data?.result[0]?.firstName);
+      // console.log(verificationCode);
+      // console.log(typeof verificationCode, typeof res.data.result[0].firstName);
+      // console.log(res?.data?.result[0]?.firstName);
       if (
         res.data.result[0].firstName == verificationCode ||
         res.data.result[0].handle === 'AR009'

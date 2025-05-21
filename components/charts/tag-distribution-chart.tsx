@@ -40,7 +40,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 };
 
 export const TagDistributionChart = () => {
-  const{problems}=useCodeforcesData();
+  const { problems } = useCodeforcesData();
   const [data, setData] = useState<Array<{ name: string; value: number }>>([]);
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();

@@ -6,13 +6,6 @@ import {
   LeaderboardEntry,
 } from '@/app/providers';
 
-
-
-
-
-
-
-
 // Tags from CodeForces
 const problemTags = [
   'implementation',
@@ -182,13 +175,13 @@ export const mockContests: Contest[] = Array.from({ length: 20 }, (_, i) => {
   return {
     id: i + 1,
     name: `Codeforces Round #${800 + i} (${types[i % types.length]})`,
-    
+
     type: `${types[i % types.length]}`,
     phase,
-    frozen:false,
-    durationSeconds:0,
-    startTimeSeconds:0,
-    relativeTimeSeconds:0,
+    frozen: false,
+    durationSeconds: 0,
+    startTimeSeconds: 0,
+    relativeTimeSeconds: 0,
   };
 });
 
@@ -305,7 +298,9 @@ mockLeaderboard.forEach((entry, i) => {
 });
 
 // Generate distribution data for charts
-export const getTagDistribution = (mockProblems:Problem[]): { name: string; value: number }[] => {
+export const getTagDistribution = (
+  mockProblems: Problem[]
+): { name: string; value: number }[] => {
   const tagCounts = new Map<string, number>();
 
   // Count the occurrences of each tag in solved problems
@@ -324,19 +319,24 @@ export const getTagDistribution = (mockProblems:Problem[]): { name: string; valu
     .slice(0, 10); // Keep only top 10 tags
 };
 
-export const getRatingOverTime = (contests:any[]): { date: string; rating: number,contestName:string,rank:number }[] => {
+export const getRatingOverTime = (
+  contests: any[]
+): { date: string; rating: number; contestName: string; rank: number }[] => {
   return contests.map((contest) => {
-  
     return {
-      date: new Date(contest.ratingUpdateTimeSeconds * 1000).toLocaleDateString(),
+      date: new Date(
+        contest.ratingUpdateTimeSeconds * 1000
+      ).toLocaleDateString(),
       rating: contest.newRating,
-      contestName:contest.contestName,
-      rank:contest.rank,
+      contestName: contest.contestName,
+      rank: contest.rank,
     };
   });
 };
 
-export const getDifficultyBreakdown = (problems:Problem[]): {
+export const getDifficultyBreakdown = (
+  problems: Problem[]
+): {
   rating: string;
   solved: number;
 }[] => {
@@ -399,10 +399,10 @@ export const getDifficultyBreakdown = (problems:Problem[]): {
   }));
 };
 export function transformSubmissions(rawSubmissions: any[]): Submission[] {
-  console.log("tranformSubmission",rawSubmissions);
+  // console.log("tranformSubmission",rawSubmissions);
   if (!rawSubmissions?.length) return mockSubmissions;
-  console.log("raw sent");
-  return rawSubmissions.map(sub => ({
+  // console.log("raw sent");
+  return rawSubmissions.map((sub) => ({
     id: sub.id.toString(),
     problemId: `${sub?.problem?.contestId}${sub?.problem?.index}`,
     problemName: sub.problem.name,
@@ -410,23 +410,24 @@ export function transformSubmissions(rawSubmissions: any[]): Submission[] {
     language: sub.programmingLanguage,
     timeSubmitted: new Date(sub.creationTimeSeconds * 1000).toISOString(),
     executionTime: sub.timeConsumedMillis || 0,
-    memoryUsed: (sub.memoryConsumedBytes / 1024) || 0,
+    memoryUsed: sub.memoryConsumedBytes / 1024 || 0,
     contestId: sub.contestId?.toString(),
     rating: sub.problem.rating || 0,
   }));
 }
 
 export function transformProblems(rawSubmissions: any[]): Problem[] {
-  console.log("tranformSubmission",rawSubmissions);
+  // console.log("tranformSubmission",rawSubmissions);
   if (!rawSubmissions?.length) return mockProblems;
-  console.log("raw sent-problems");
-  return rawSubmissions.map(sub => ({
+  // console.log("raw sent-problems");
+  return rawSubmissions.map((sub) => ({
     id: `${sub?.problem?.contestId}${sub?.problem?.index}`,
-    name:sub.problem.name,
-    rating:sub.problem.rating,
-    tags:sub.problem.tags,
-    solved:(sub.verdict==="OK"),
-    contestId:sub.problem.contestId.toString(),
-    index:sub.problem.index,
-    
-  }));}
+    name: sub.problem.name,
+    rating: sub.problem.rating,
+    tags: sub.problem.tags,
+    solved: sub.verdict === 'OK',
+    contestId: sub.problem.contestId.toString(),
+    index: sub.problem.index,
+  }));
+}
+

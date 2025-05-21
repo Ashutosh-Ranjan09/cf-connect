@@ -44,7 +44,7 @@ const getDifficultyColor = (rating: string): string => {
   const lowerBound = parseInt(rating.split('-')[0]);
 
   if (lowerBound === 800) return '#cccccc';
-  if (lowerBound ===900) return '#77ff77';
+  if (lowerBound === 900) return '#77ff77';
   if (lowerBound === 1000) return '#77ddbb';
   if (lowerBound === 1100) return '#aaaaff';
   if (lowerBound === 1200) return '#ff88ff';
@@ -63,8 +63,8 @@ const getDifficultyColor = (rating: string): string => {
 };
 
 export const DifficultyBreakdownChart = () => {
-  const {problems}=useCodeforcesData();
-  console.log(problems);
+  const { problems } = useCodeforcesData();
+  // console.log(problems);
   const [data, setData] = useState<Array<{ rating: string; solved: number }>>(
     []
   );

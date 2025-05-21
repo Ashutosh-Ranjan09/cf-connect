@@ -11,16 +11,12 @@ export default async function ProfileLayout({
   children: React.ReactNode;
   params: { username: string };
 }) {
-  const { username } = params;
+  const { username } = await params;
 
-  const handle=username;
+  const handle = username;
   // Fetch data from server if user is authenticated
-  const serverData = handle ? await fetchServerData(handle):{};
+  const serverData = handle ? await fetchServerData(handle) : {};
   // console.log(serverData);
 
-  return (
-    <Providers serverData={serverData}>
-      {children}
-    </Providers>
-  );
+  return <Providers serverData={serverData}>{children}</Providers>;
 }

@@ -47,11 +47,9 @@ export default function LoginPage() {
   });
 
   // Login handler
-  const onSubmit = async (values:LoginFormValues) => {
+  const onSubmit = async (values: LoginFormValues) => {
     try {
-      const success = await login(
-        values.handle,values.password
-      );
+      const success = await login(values.handle, values.password);
       if (success) {
         toast({
           title: 'Login successful',
@@ -59,16 +57,14 @@ export default function LoginPage() {
           duration: 3000,
         });
         router.push('/dashboard');
-      }
-      else
-      {
+      } else {
         toast({
-        title: 'Login failed',
-        description: 'Please check your credentials and try again.',
-        variant: 'destructive',
-        duration: 5000,
-      });
-    }
+          title: 'Login failed',
+          description: 'Please check your credentials and try again.',
+          variant: 'destructive',
+          duration: 5000,
+        });
+      }
     } catch (error) {
       toast({
         title: 'Login failed',

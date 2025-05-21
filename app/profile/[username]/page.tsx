@@ -47,32 +47,30 @@ import {
 import { AppShell } from '@/components/layout/app-shell';
 import { Textarea } from '@/components/ui/textarea';
 import axios from 'axios';
-type UserProfile=
-  {
-    handle: string;
-    name:string;
-    rating: number,
-    rank: string,
-    maxRating: number,
-    maxRank: string,
-    country: string,
-    organization: string,
-    registrationTimeSeconds:number,
-    friendOfCount:number, 
-    avatar: string,
-    titlePhoto: string,
-    contribution: number,
-    lastOnlineTimeSeconds:number, 
-    aboutMe:
-      string,
-    websites:any[]
-  }
+type UserProfile = {
+  handle: string;
+  name: string;
+  rating: number;
+  rank: string;
+  maxRating: number;
+  maxRank: string;
+  country: string;
+  organization: string;
+  registrationTimeSeconds: number;
+  friendOfCount: number;
+  avatar: string;
+  titlePhoto: string;
+  contribution: number;
+  lastOnlineTimeSeconds: number;
+  aboutMe: string;
+  websites: any[];
+};
 export default function ProfilePage() {
   const params = useParams();
   const username = params.username as string;
   const { user } = useAuth();
-  const { submissions, isLoading,profileData } = useCodeforcesData();
-  console.log(profileData);
+  const { submissions, isLoading, profileData } = useCodeforcesData();
+  // console.log(profileData);
   const [userSubmissions, setUserSubmissions] = useState<Submission[]>([]);
   const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>(
     []
@@ -93,42 +91,41 @@ export default function ProfilePage() {
 
   // Mocked profile data
   const [profile, setProfile] = useState<UserProfile>({
-    handle: "",
-    name:"",
+    handle: '',
+    name: '',
     rating: 0,
-    rank: "",
-    maxRating:0,
-    maxRank: "",
-    country: "",
-    organization: "",
-    registrationTimeSeconds:0,
-    friendOfCount:0,
-    avatar: "",
-    titlePhoto: "",
+    rank: '',
+    maxRating: 0,
+    maxRank: '',
+    country: '',
+    organization: '',
+    registrationTimeSeconds: 0,
+    friendOfCount: 0,
+    avatar: '',
+    titlePhoto: '',
     contribution: 0,
-    lastOnlineTimeSeconds:0,
-    aboutMe:
-      "",
-    websites:[],
+    lastOnlineTimeSeconds: 0,
+    aboutMe: '',
+    websites: [],
   });
 
   // Filter submissions and set up
   useEffect(() => {
-  setMounted(true);
+    setMounted(true);
 
-  if (!isLoading && submissions && submissions.length > 0 ) {
-    setUserSubmissions(submissions);
-    setFilteredSubmissions(submissions);
-  } 
+    if (!isLoading && submissions && submissions.length > 0) {
+      setUserSubmissions(submissions);
+      setFilteredSubmissions(submissions);
+    }
 
-  // Initialize edit states
-  setAboutText(profile.aboutMe);
-  setWebsiteLinks([...profile.websites]);
-}, [isLoading, submissions, ]);
-useEffect(() => {
+    // Initialize edit states
+    setAboutText(profile.aboutMe);
+    setWebsiteLinks([...profile.websites]);
+  }, [isLoading, submissions]);
+  useEffect(() => {
     if (profileData && profileData.length > 0) {
-      console.log("Setting profile data:", profileData[0]);
-      
+      // console.log("Setting profile data:", profileData[0]);
+
       // Create default websites array if not available
       const defaultWebsites = [
         {
@@ -147,57 +144,61 @@ useEffect(() => {
           icon: <LinkIcon className="h-4 w-4" />,
         },
       ];
-      const transformedWebsites = profileData[0]?.websites?.map((url:any) => {
-  // Determine the type of website based on the URL
-  if (url.includes('github.com')) {
-    return {
-      name: 'GitHub',
-      url,
-      icon: <Github className="h-4 w-4" />
-    };
-  } else if (url.includes('twitter.com')) {
-    return {
-      name: 'Twitter',
-      url,
-      icon: <Twitter className="h-4 w-4" />
-    };
-  } else if (url.includes('linkedin.com')) {
-    return {
-      name: 'LinkedIn',
-      url,
-      icon: <Linkedin className="h-4 w-4" />
-    };
-  } else {
-    return {
-      name: 'Website',
-      url,
-      icon: <LinkIcon className="h-4 w-4" />
-    };
-  }
-}) || defaultWebsites;
+      const transformedWebsites =
+        profileData[0]?.websites?.map((url: any) => {
+          // Determine the type of website based on the URL
+          if (url.includes('github.com')) {
+            return {
+              name: 'GitHub',
+              url,
+              icon: <Github className="h-4 w-4" />,
+            };
+          } else if (url.includes('twitter.com')) {
+            return {
+              name: 'Twitter',
+              url,
+              icon: <Twitter className="h-4 w-4" />,
+            };
+          } else if (url.includes('linkedin.com')) {
+            return {
+              name: 'LinkedIn',
+              url,
+              icon: <Linkedin className="h-4 w-4" />,
+            };
+          } else {
+            return {
+              name: 'Website',
+              url,
+              icon: <LinkIcon className="h-4 w-4" />,
+            };
+          }
+        }) || defaultWebsites;
       const newProfile = {
         handle: username,
-        name: profileData[0]?.firstName && profileData[0]?.lastName 
-          ? `${profileData[0].firstName} ${profileData[0].lastName}` 
-          : username,
+        name:
+          profileData[0]?.firstName && profileData[0]?.lastName
+            ? `${profileData[0].firstName} ${profileData[0].lastName}`
+            : username,
         rating: profileData[0]?.rating || 0,
-        rank: profileData[0]?.rank || "",
+        rank: profileData[0]?.rank || '',
         maxRating: profileData[0]?.maxRating || 0,
-        maxRank: profileData[0]?.maxRank || "",
-        country: profileData[0]?.country || "",
-        organization: profileData[0]?.organization || "",
+        maxRank: profileData[0]?.maxRank || '',
+        country: profileData[0]?.country || '',
+        organization: profileData[0]?.organization || '',
         registrationTimeSeconds: profileData[0]?.registrationTimeSeconds || 0,
         friendOfCount: profileData[0]?.friendOfCount || 0,
-        avatar: profileData[0]?.avatar || "https://userpic.codeforces.org/no-avatar.jpg",
-        titlePhoto: profileData[0]?.titlePhoto || "",
+        avatar:
+          profileData[0]?.avatar ||
+          'https://userpic.codeforces.org/no-avatar.jpg',
+        titlePhoto: profileData[0]?.titlePhoto || '',
         contribution: profileData[0]?.contribution || 0,
         lastOnlineTimeSeconds: profileData[0]?.lastOnlineTimeSeconds || 0,
-        aboutMe: profileData[0]?.aboutMe || "No information provided.",
+        aboutMe: profileData[0]?.aboutMe || 'No information provided.',
         websites: transformedWebsites,
       };
-      
+
       setProfile(newProfile);
-      
+
       // Initialize edit states after profile is set
       setAboutText(newProfile.aboutMe);
       setWebsiteLinks([...newProfile.websites]);
@@ -205,18 +206,18 @@ useEffect(() => {
   }, [profileData, username]);
   const [verdictFilter, setVerdictFilter] = useState('');
 
-    // Handle verdict filter
-    useEffect(() => {
-      if (verdictFilter === '') {
-        setFilteredSubmissions(userSubmissions);
-      } else {
-        setFilteredSubmissions(
-          userSubmissions.filter((submission) =>
-            submission.verdict.toLowerCase().includes(verdictFilter.toLowerCase())
-          )
-        );
-      }
-    }, [verdictFilter, userSubmissions]);
+  // Handle verdict filter
+  useEffect(() => {
+    if (verdictFilter === '') {
+      setFilteredSubmissions(userSubmissions);
+    } else {
+      setFilteredSubmissions(
+        userSubmissions.filter((submission) =>
+          submission.verdict.toLowerCase().includes(verdictFilter.toLowerCase())
+        )
+      );
+    }
+  }, [verdictFilter, userSubmissions]);
   // Handle search query
   useEffect(() => {
     if (searchQuery.trim() === '') {
@@ -270,7 +271,7 @@ useEffect(() => {
       cell: (info: any) => formatMemory(info.getValue()),
     },
   ];
-  const {pastContest}=useCodeforcesData();
+  const { pastContest } = useCodeforcesData();
   // Statistics
   const stats = {
     totalSolved: userSubmissions.filter((s) => s.verdict === 'OK').length,
@@ -289,35 +290,33 @@ useEffect(() => {
 
   // Save about text
   const handleSaveAbout = async () => {
-    
-    try{
-      const res=await axios.patch('/api/aboutMe',{aboutMe:aboutText});
-    if(res.status!==200)throw "failed to update aboutme";
-    setProfile((prev) => ({
-      ...prev,
-      aboutMe: aboutText,
-    }));
-  }catch(err)
-  {
-    console.log(err);
-  }
+    try {
+      const res = await axios.patch('/api/aboutMe', { aboutMe: aboutText });
+      if (res.status !== 200) throw 'failed to update aboutme';
+      setProfile((prev) => ({
+        ...prev,
+        aboutMe: aboutText,
+      }));
+    } catch (err) {
+      console.log(err);
+    }
     setIsEditingAbout(false);
   };
 
   // Save links
-  const handleSaveLinks = async() => {
-    
-    try{
-      const res=await axios.post('/api/websites',{links:websiteLinks.map((url)=>url.url)});
-    if(res.status!==200)throw "failed to update aboutme";
-    setProfile((prev) => ({
-      ...prev,
-      websites: [...websiteLinks],
-    }));
-  }catch(err)
-  {
-    console.log(err);
-  }
+  const handleSaveLinks = async () => {
+    try {
+      const res = await axios.post('/api/websites', {
+        links: websiteLinks.map((url) => url.url),
+      });
+      if (res.status !== 200) throw 'failed to update aboutme';
+      setProfile((prev) => ({
+        ...prev,
+        websites: [...websiteLinks],
+      }));
+    } catch (err) {
+      console.log(err);
+    }
     setIsEditingLinks(false);
   };
 
@@ -370,7 +369,7 @@ useEffect(() => {
       </div>
     );
   }
-  console.log("filtered->",filteredSubmissions);
+  // console.log("filtered->",filteredSubmissions);
   return (
     <AppShell>
       <div className="container mx-auto py-3 sm:py-4 md:py-6 px-2 sm:px-4">
@@ -641,94 +640,97 @@ useEffect(() => {
 
           <Card className="md:col-span-2">
             <CardHeader className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2 sm:pb-3">
-  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-    <div>
-      <CardTitle className="text-base sm:text-lg md:text-xl">
-        Recent Submissions
-      </CardTitle>
-      <CardDescription className="text-xs sm:text-sm">
-        Latest problem submissions by {profile.handle}
-      </CardDescription>
-    </div>
-    {!isOwnProfile && (
-      <Button variant="outline" size="sm" asChild>
-        <a
-          href={`https://codeforces.com/profile/${username}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2"
-        >
-          
-          <ExternalLink className="h-4 w-4" />
-          <span>View on CodeForces</span>
-        </a>
-      </Button>
-    )}
-  </div>
-  <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-2 sm:mt-4">
-  <div className="relative flex-1">
-    <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-    <Input
-      type="search"
-      placeholder="Search submissions..."
-      className="pl-8 text-sm h-8 sm:h-10"
-      value={searchQuery}
-      onChange={(e) => setSearchQuery(e.target.value)}
-    />
-  </div>
-  
-  <div className="flex gap-2">
-    <select
-      value={verdictFilter}
-      onChange={(e) => setVerdictFilter(e.target.value)}
-      className="h-8 sm:h-10 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      <option value="">All Verdicts</option>
-      <option value="OK">Accepted</option>
-      <option value="WRONG_ANSWER">Wrong Answer</option>
-      <option value="TIME_LIMIT_EXCEEDED">Time Limit Exceeded</option>
-      <option value="MEMORY_LIMIT_EXCEEDED">Memory Limit Exceeded</option>
-      <option value="RUNTIME_ERROR">Runtime Error</option>
-    </select>
-{/*     
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div>
+                  <CardTitle className="text-base sm:text-lg md:text-xl">
+                    Recent Submissions
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
+                    Latest problem submissions by {profile.handle}
+                  </CardDescription>
+                </div>
+                {!isOwnProfile && (
+                  <Button variant="outline" size="sm" asChild>
+                    <a
+                      href={`https://codeforces.com/profile/${username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      <span>View on CodeForces</span>
+                    </a>
+                  </Button>
+                )}
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-2 sm:mt-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search submissions..."
+                    className="pl-8 text-sm h-8 sm:h-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <select
+                    value={verdictFilter}
+                    onChange={(e) => setVerdictFilter(e.target.value)}
+                    className="h-8 sm:h-10 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="">All Verdicts</option>
+                    <option value="OK">Accepted</option>
+                    <option value="WRONG_ANSWER">Wrong Answer</option>
+                    <option value="TIME_LIMIT_EXCEEDED">
+                      Time Limit Exceeded
+                    </option>
+                    <option value="MEMORY_LIMIT_EXCEEDED">
+                      Memory Limit Exceeded
+                    </option>
+                    <option value="RUNTIME_ERROR">Runtime Error</option>
+                  </select>
+                  {/*     
     <Button variant="outline" size="icon" className="h-8 sm:h-10 w-8 sm:w-10">
       <Filter className="h-4 w-4" />
     </Button> */}
-  </div>
-</div>
-</CardHeader>
+                </div>
+              </div>
+            </CardHeader>
             <CardContent>
-  {filteredSubmissions && filteredSubmissions.length > 0 ? (
-    <>
-      <div className="mb-2">
-        <p className="text-sm text-muted-foreground">
-          Showing {filteredSubmissions.length} submissions
-        </p>
-      </div>
-      <DataTable
-        columns={columns}
-        data={filteredSubmissions}
-        pageSize={10}
-      />
-    </>
-  ) : (
-    <div className="py-8 text-center">
-      <p className="text-muted-foreground">No submissions found</p>
-    </div>
-  )}
-</CardContent>
+              {filteredSubmissions && filteredSubmissions.length > 0 ? (
+                <>
+                  <div className="mb-2">
+                    <p className="text-sm text-muted-foreground">
+                      Showing {filteredSubmissions.length} submissions
+                    </p>
+                  </div>
+                  <DataTable
+                    columns={columns}
+                    data={filteredSubmissions}
+                    pageSize={10}
+                  />
+                </>
+              ) : (
+                <div className="py-8 text-center">
+                  <p className="text-muted-foreground">No submissions found</p>
+                </div>
+              )}
+            </CardContent>
 
             <CardFooter className="px-3 sm:px-4 pt-0 pb-3 sm:pb-4 flex justify-end">
-  <Button variant="outline" size="sm" asChild>
-    <a
-      href={`https://codeforces.com/submissions/${username}`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      View All on CodeForces
-    </a>
-  </Button>
-</CardFooter>
+              <Button variant="outline" size="sm" asChild>
+                <a
+                  href={`https://codeforces.com/submissions/${username}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View All on CodeForces
+                </a>
+              </Button>
+            </CardFooter>
           </Card>
         </div>
       </div>

@@ -10,7 +10,10 @@ export async function POST(request: NextRequest) {
   const token = await getToken({ req: request });
   const username = token?.username;
   if (!username) {
-    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { success: false, message: 'Unauthorized' },
+      { status: 401 }
+    );
   }
 
   try {
@@ -22,7 +25,10 @@ export async function POST(request: NextRequest) {
     );
 
     if (!updated) {
-      return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, message: 'User not found' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(
