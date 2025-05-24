@@ -34,7 +34,7 @@ interface DataProviderProps {
     rawContests: any[];
     rawPastContestData?: any[];
     rawProfileData: any[];
-    rawFriends:any[];
+    rawFriends: any[];
   };
 }
 type AuthContextType = {

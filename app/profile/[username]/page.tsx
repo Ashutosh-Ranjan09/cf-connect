@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 import {
   Card,
   CardContent,
@@ -47,6 +48,7 @@ import {
 import { AppShell } from '@/components/layout/app-shell';
 import { Textarea } from '@/components/ui/textarea';
 import axios from 'axios';
+// import { useToast } from '@/hooks/use-toast';
 type UserProfile = {
   handle: string;
   name: string;
@@ -88,6 +90,14 @@ export default function ProfilePage() {
   const [newLinkName, setNewLinkName] = useState('');
   const [newLinkUrl, setNewLinkUrl] = useState('');
   const [newLinkType, setNewLinkType] = useState('website');
+
+  //
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
+  const [isPrivateProfile, setIsPrivateProfile] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   // Mocked profile data
   const [profile, setProfile] = useState<UserProfile>({
@@ -202,8 +212,21 @@ export default function ProfilePage() {
       // Initialize edit states after profile is set
       setAboutText(newProfile.aboutMe);
       setWebsiteLinks([...newProfile.websites]);
+      setIsPrivateProfile(profileData[0]?.isPrivate || false);
+      if (profileData[0]?.follower && Array.isArray(profileData[0].follower)) {
+        setIsFollowing(profileData[0].follower.includes(user?.handle || ''));
+      }
+
+      if (
+        profileData[0]?.requestRecieved &&
+        Array.isArray(profileData[0].requestRecieved)
+      ) {
+        setRequestSent(
+          profileData[0].requestRecieved.includes(user?.handle || '')
+        );
+      }
     }
-  }, [profileData, username]);
+  }, [profileData, username, user?.handle]);
   const [verdictFilter, setVerdictFilter] = useState('');
 
   // Handle verdict filter
@@ -370,6 +393,76 @@ export default function ProfilePage() {
     );
   }
   // console.log("filtered->",filteredSubmissions);
+  const handleFollowAction = async () => {
+    if (!user?.isAuthenticated) {
+      toast({
+        title: 'Authentication required',
+        description: 'Please log in to follow users',
+        variant: 'destructive',
+      });
+      router.push('/login');
+      return;
+    }
+
+    setFollowLoading(true);
+    try {
+      if (isFollowing) {
+        // Unfollow logic
+        const response = await axios.delete(
+          `/api/friend-req?username=${username}`
+        );
+        if (response.status === 200) {
+          setIsFollowing(false);
+          toast({
+            title: 'Success',
+            description: `You have unfollowed ${username}`,
+          });
+        }
+      } else if (requestSent) {
+        // Cancel request logic
+        const response = await axios.delete(
+          `/api/friend-req?username=${username}&action=cancel`
+        );
+        if (response.status === 200) {
+          setRequestSent(false);
+          toast({
+            title: 'Request canceled',
+            description: `Follow request to ${username} has been canceled`,
+          });
+        }
+      } else {
+        // Follow or send request logic
+        const response = await axios.post('/api/friend-req', {
+          reciever: username,
+        });
+
+        if (response.status === 200) {
+          if (response.data.message === 'Following this user') {
+            setIsFollowing(true);
+            toast({
+              title: 'Success',
+              description: `You are now following ${username}`,
+            });
+          } else if (response.data.message === 'Request sent') {
+            setRequestSent(true);
+            toast({
+              title: 'Request sent',
+              description: `Follow request sent to ${username}`,
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error handling follow action:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to process your request. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setFollowLoading(false);
+    }
+  };
   return (
     <AppShell>
       <div className="container mx-auto py-3 sm:py-4 md:py-6 px-2 sm:px-4">
@@ -632,8 +725,26 @@ export default function ProfilePage() {
                 )}
               </div>
 
-              {user?.handle !== username && (
-                <Button className="w-full">Follow User</Button>
+              {!isOwnProfile && (
+                <Button
+                  className="w-full"
+                  variant={isFollowing ? 'outline' : 'default'}
+                  onClick={handleFollowAction}
+                  disabled={followLoading}
+                >
+                  {followLoading ? (
+                    <span className="flex items-center">
+                      <span className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full"></span>
+                      Processing...
+                    </span>
+                  ) : isFollowing ? (
+                    'Unfollow'
+                  ) : requestSent ? (
+                    'Requested'
+                  ) : (
+                    'Follow'
+                  )}
+                </Button>
               )}
             </CardContent>
           </Card>

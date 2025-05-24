@@ -430,4 +430,3 @@ export function transformProblems(rawSubmissions: any[]): Problem[] {
     index: sub.problem.index,
   }));
 }
-

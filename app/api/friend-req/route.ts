@@ -198,11 +198,12 @@ const res2=await UserModel.findOneAndUpdate({username:username},{
 export async function DELETE(request: NextRequest) {
   await dbConnect();
   try {
-    const 
     const url = new URL(request.url);
+    const username = url.searchParams.get('username');
     const action = url.searchParams.get('action');
+
     const token = await getToken({
-      req: request, // encryption: true // if you’re using encrypted JWTs
+      req: request,
     });
 
     if (!token?.username) {
@@ -211,7 +212,7 @@ export async function DELETE(request: NextRequest) {
         { status: 401 }
       );
     }
-    const username = token.username as string;
+    const currentUser = token.username as string;
 
     if (!username) {
       return NextResponse.json(
@@ -220,28 +221,68 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const res1 = await UserModel.findOne(
-      { username: username }
-      //   { new: true, runValidators: true }
-    );
-    console.log('req->', res1);
-    if (action === 'sent') {
+    // Handle different actions
+    if (action === 'reject') {
+      // Reject a follow request - remove from requestRecieved and requestSent
+      const res1 = await UserModel.findOneAndUpdate(
+        { username: currentUser },
+        { $pull: { requestRecieved: username } },
+        { new: true, runValidators: true }
+      );
+
+      const res2 = await UserModel.findOneAndUpdate(
+        { username: username },
+        { $pull: { requestSent: currentUser } },
+        { new: true, runValidators: true }
+      );
+
       return NextResponse.json(
-        { success: true, reqRecieved: res1?.requestSent ?? [] },
+        { success: true, message: 'Request rejected' },
         { status: 200 }
       );
-    } else if (action === 'recieved') {
+    } else if (action === 'cancel') {
+      // Cancel a sent request - remove from requestSent and requestRecieved
+      const res1 = await UserModel.findOneAndUpdate(
+        { username: currentUser },
+        { $pull: { requestSent: username } },
+        { new: true, runValidators: true }
+      );
+
+      const res2 = await UserModel.findOneAndUpdate(
+        { username: username },
+        { $pull: { requestRecieved: currentUser } },
+        { new: true, runValidators: true }
+      );
+
       return NextResponse.json(
-        { success: true, reqRecieved: res1?.requestRecieved ?? [] },
+        { success: true, message: 'Request canceled' },
+        { status: 200 }
+      );
+    } else {
+      // Default action: unfollow - remove from following and follower
+      const res1 = await UserModel.findOneAndUpdate(
+        { username: currentUser },
+        { $pull: { following: username } },
+        { new: true, runValidators: true }
+      );
+
+      const res2 = await UserModel.findOneAndUpdate(
+        { username: username },
+        { $pull: { follower: currentUser } },
+        { new: true, runValidators: true }
+      );
+
+      return NextResponse.json(
+        { success: true, message: 'Unfollowed successfully' },
         { status: 200 }
       );
     }
   } catch (error) {
-    console.error('Failed to send request');
+    console.error('Failed to process request:', error);
     return Response.json(
       {
         success: false,
-        message: 'Error sending request',
+        message: 'Error processing request',
       },
       {
         status: 500,

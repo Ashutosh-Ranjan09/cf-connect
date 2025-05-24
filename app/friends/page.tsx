@@ -13,19 +13,26 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Search, Users, UserPlus, UserMinus, ExternalLink } from 'lucide-react';
-import { useCodeforcesData, Friend } from '@/app/providers';
+import { Search, Users, UserPlus, UserMinus, ExternalLink, X } from 'lucide-react';
+import { useCodeforcesData, Friend, useAuth } from '@/app/providers';
 import { getRatingColor } from '@/lib/utils';
 import Link from 'next/link';
 import { AppShell } from '@/components/layout/app-shell';
-
+import { useToast } from '@/hooks/use-toast';
+import axios from 'axios';
+import UserSearch from '@/components/ui/usersearch';
+import {  Check } from 'lucide-react';
 export default function FriendsPage() {
   const { friends, isLoading } = useCodeforcesData();
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredFriends, setFilteredFriends] = useState<Friend[]>([]);
   const [localFriends, setLocalFriends] = useState<Friend[]>([]);
-
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [followRequests, setFollowRequests] = useState<string[]>([]);
+  const [requestsLoading, setRequestsLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   // Handle hydration mismatch
   useEffect(() => {
     setMounted(true);
@@ -50,18 +57,164 @@ export default function FriendsPage() {
       }
     }
   }, [isLoading, friends, searchQuery]);
+  const fetchFollowRequests = async () => {
+      if (!user?.isAuthenticated) return;
 
+      try {
+        const response = await axios.get('/api/friend-req?action=recieved');
+        if (response.data.success && response.data.reqRecieved) {
+          setFollowRequests(response.data.reqRecieved);
+        }
+      } catch (error) {
+        console.error('Error fetching follow requests:', error);
+      } finally {
+        setRequestsLoading(false);
+      }
+    };
+  useEffect(() => {
+  
+    if (mounted && user?.isAuthenticated) {
+      fetchFollowRequests();
+    }
+  }, [mounted, user?.isAuthenticated]);
+  
   // Toggle friend follow status
-  const toggleFollow = (handle: string) => {
-    setLocalFriends((prev) =>
-      prev.map((friend) =>
-        friend.handle === handle
-          ? { ...friend, isFollowing: !friend.isFollowing }
-          : friend
-      )
-    );
+  const toggleFollow = async (handle: string, currentStatus: 'none' | 'following' | 'requested') => {
+  try {
+    setActionLoading(handle);
+    
+    if (currentStatus === 'none') {
+      // Send follow request
+      const response = await axios.post('/api/friend-req', { reciever: handle });
+      
+      if (response.data.success) {
+        if (response.data.message === 'Request sent') {
+          // Private account - request sent
+          toast({
+            title: 'Request Sent',
+            description: `Follow request sent to ${handle}`,
+          });
+          // No UI update needed for private accounts
+        } else {
+          // Public account - immediately followed
+          toast({
+            title: 'Following',
+            description: `You are now following ${handle}`,
+          });
+          
+          // Create a new friend object to add to the local state
+          const newFriend = {
+            handle: handle,
+            rating: 0, // You might want to get this from the search results
+            rank: "", // You might want to get this from the search results
+            avatar: "",
+            isFollowing: true,
+            lastSeen: new Date().toISOString()
+          };
+          
+          // Add to local state
+          setLocalFriends(prev => [...prev, newFriend]);
+          setFilteredFriends(prev => [...prev, newFriend]);
+          
+          // Force refresh browser page to get fresh data from server
+          window.location.reload();
+        }
+      }
+    } else if (currentStatus === 'following') {
+      // Unfollow
+      const response = await axios.delete(`/api/friend-req?username=${handle}`);
+      if (response.data.success) {
+        toast({
+          title: 'Unfollowed',
+          description: `You have unfollowed ${handle}`,
+        });
+        
+        // Remove from local state
+        setLocalFriends(prev => prev.filter(friend => friend.handle !== handle));
+        setFilteredFriends(prev => prev.filter(friend => friend.handle !== handle));
+        
+        // Force refresh browser page to get fresh data from server
+        window.location.reload();
+      }
+    } else if (currentStatus === 'requested') {
+      // Cancel request
+      const response = await axios.delete(`/api/friend-req?username=${handle}&action=cancel`);
+      if (response.data.success) {
+        toast({
+          title: 'Request Canceled',
+          description: `Follow request to ${handle} has been canceled`,
+        });
+        // No UI update needed for canceling requests
+      }
+    }
+    
+    // Refresh follow requests
+    fetchFollowRequests();
+    
+  } catch (error) {
+    toast({
+      title: 'Error',
+      description: 'An error occurred. Please try again.',
+      variant: 'destructive',
+    });
+  } finally {
+    setActionLoading(null);
+  }
+};
+  const handleAcceptRequest = async (sender: string) => {
+    setActionLoading(sender);
+    try {
+      const response = await axios.patch('/api/friend-req', { sender });
+
+      if (response.data.success) {
+        // Remove from requests list
+        setFollowRequests((prev) => prev.filter((req) => req !== sender));
+
+        toast({
+          title: 'Request accepted',
+          description: `You are now connected with ${sender}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error accepting request:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to accept request. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setActionLoading(null);
+    }
   };
 
+  // Reject follow request
+  const handleRejectRequest = async (sender: string) => {
+    setActionLoading(sender);
+    try {
+      const response = await axios.delete(
+        `/api/friend-req?username=${sender}&action=reject`
+      );
+
+      if (response.status === 200) {
+        // Remove from requests list
+        setFollowRequests((prev) => prev.filter((req) => req !== sender));
+
+        toast({
+          title: 'Request rejected',
+          description: `Follow request from ${sender} has been rejected`,
+        });
+      }
+    } catch (error) {
+      console.error('Error rejecting request:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to reject request. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setActionLoading(null);
+    }
+  };
   if (!mounted || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -74,6 +227,7 @@ export default function FriendsPage() {
     <AppShell>
       <div className="container px-3 py-3 mx-auto sm:px-4 sm:py-4 md:py-6 lg:px-6">
         <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6">
+          <UserSearch/>
           {/* Main content area */}
           <div className="space-y-3 sm:space-y-4 md:space-y-6">
             <Card className="overflow-hidden">
@@ -91,7 +245,7 @@ export default function FriendsPage() {
                     <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                     <Input
                       type="search"
-                      placeholder="Search users..."
+                      placeholder="Search friends..."
                       className="pl-8 w-full sm:w-[180px] md:w-[220px] lg:w-[250px] h-9"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
@@ -113,6 +267,20 @@ export default function FriendsPage() {
                       className="flex-1 text-xs sm:text-sm"
                     >
                       Following Me
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="requests"
+                      className="flex-1 text-xs sm:text-sm"
+                    >
+                      Requests{' '}
+                      {followRequests.length > 0 && (
+                        <Badge
+                          variant="secondary"
+                          className="ml-1 px-1.5 py-0 text-xs"
+                        >
+                          {followRequests.length}
+                        </Badge>
+                      )}
                     </TabsTrigger>
                   </TabsList>
 
@@ -173,7 +341,7 @@ export default function FriendsPage() {
                                   variant="default"
                                   size="sm"
                                   className="h-7 text-xs w-full sm:w-auto"
-                                  onClick={() => toggleFollow(friend.handle)}
+                                  onClick={() => toggleFollow(friend.handle,'following')}
                                 >
                                   <UserMinus className="h-3 w-3 mr-1" />
                                   <span className="hidden sm:inline">
@@ -255,7 +423,7 @@ export default function FriendsPage() {
                                   variant="outline"
                                   size="sm"
                                   className="h-7 text-xs w-full sm:w-auto"
-                                  onClick={() => toggleFollow(friend.handle)}
+                                  onClick={() => toggleFollow(friend.handle,'none')}
                                 >
                                   <UserPlus className="h-3 w-3 mr-1" />
                                   <span className="hidden sm:inline">
@@ -276,6 +444,76 @@ export default function FriendsPage() {
                               </div>
                             </div>
                           ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                  <TabsContent value="requests" className="space-y-4">
+                    {requestsLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      </div>
+                    ) : followRequests.length === 0 ? (
+                      <div className="text-center py-4 sm:py-6">
+                        <Users className="h-8 w-8 mx-auto text-muted-foreground opacity-50" />
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          No pending follow requests
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2">
+                        {followRequests.map((handle) => (
+                          <div
+                            key={handle}
+                            className="bg-card border rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4"
+                          >
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                              <Avatar className="h-8 w-8 flex-shrink-0">
+                                <AvatarFallback>
+                                  {handle.substring(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                                  <Link
+                                    href={`/profile/${handle}`}
+                                    className="font-medium hover:underline text-sm truncate max-w-full sm:max-w-[120px] md:max-w-[150px]"
+                                  >
+                                    {handle}
+                                  </Link>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                  Wants to follow you
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2 sm:mt-0 self-end sm:self-auto flex-shrink-0">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 text-xs w-full sm:w-auto"
+                                onClick={() => handleAcceptRequest(handle)}
+                                disabled={actionLoading === handle}
+                              >
+                                {actionLoading === handle ? (
+                                  <span className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full mr-1"></span>
+                                ) : (
+                                  <Check className="h-3 w-3 mr-1" />
+                                )}
+                                <span>Accept</span>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 text-xs w-full sm:w-auto text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => handleRejectRequest(handle)}
+                                disabled={actionLoading === handle}
+                              >
+                                <X className="h-3 w-3 mr-1" />
+                                <span>Reject</span>
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </TabsContent>
@@ -333,7 +571,7 @@ export default function FriendsPage() {
                           variant="outline"
                           size="sm"
                           className="h-7 text-xs whitespace-nowrap flex-shrink-0"
-                          onClick={() => toggleFollow(friend.handle)}
+                          onClick={() => toggleFollow(friend.handle,'none')}
                         >
                           <UserPlus className="h-3 w-3 mr-1" />
                           Follow

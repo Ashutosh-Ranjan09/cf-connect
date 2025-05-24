@@ -43,72 +43,109 @@ export async function fetchServerData(handle?: string) {
       ...profileData.result[0],
       aboutMe: dbprofile?.aboutme,
       websites: dbprofile?.links,
-      isPrivate:dbprofile?.isPrivate,
-      follower:dbprofile?.follower,
-      following:dbprofile?.following,
-      requestSent:dbprofile?.requestSent,
-      requestRecieved:dbprofile?.requestRecieved,
+      isPrivate: dbprofile?.isPrivate,
+      follower: dbprofile?.follower,
+      following: dbprofile?.following,
+      requestSent: dbprofile?.requestSent,
+      requestRecieved: dbprofile?.requestRecieved,
     };
     const arrProfileData = [profileData2];
     // console.log("raw-submission-server-api.ts= ",contestsData);
 
-    let Friends=[];
-    let str="";
+    let Friends = [];
+    let str = '';
     // console.log(str,dbprofile?.follower);
-    let arr=dbprofile?.follower||[];
-    for(let s of arr)
+
+    let arr = dbprofile?.follower || [];
+    if(arr.length>0)
     {
+    for (let s of arr) {
       // console.log(s);
-      str+=`${s};`;
+      str += `${s};`;
     }
     // console.log(str);
-    str=str.slice(0,str.length-1);
+    str = str.slice(0, str.length - 1);
     console.log(str);
-    const objres=await fetch(`https://codeforces.com/api/user.info?handles=${str}`);
-    const obj=objres.ok?await objres.json():[];
+    const objres = await fetch(
+      `https://codeforces.com/api/user.info?handles=${str}`
+    );
+    const obj = objres.ok ? await objres.json() : [];
     console.log(obj);
-    for(const us of obj.result)
-    {
+    for (const us of obj.result) {
       Friends.push({
-        handle:us.handle,
-        rating:us.rating,
-        rank:us.rank,
-        avatar:us.avatar,
-        isFollowing:false,
+        handle: us.handle,
+        rating: us.rating,
+        rank: us.rank,
+        avatar: us.avatar,
+        isFollowing: false,
       });
     }
-    str="";
-    // console.log(str,dbprofile?.follower);
-    arr=dbprofile?.following||[];
-    for(let s of arr)
-    {
-      // console.log(s);
-      str+=`${s};`;
+  }
+ arr = dbprofile?.following || [];
+if (arr.length > 0) {
+  str = '';
+  for (let s of arr) {
+    str += `${s};`;
+  }
+  str = str.slice(0, str.length - 1);
+  
+  try {
+    const objresf = await fetch(
+      `https://codeforces.com/api/user.info?handles=${str}`
+    );
+    
+    const objf = objresf.ok ? await objresf.json() : { result: [] };
+    
+    if (objf && objf.result && Array.isArray(objf.result)) {
+      for (const us of objf.result) {
+        Friends.push({
+          handle: us.handle,
+          rating: us.rating || 0,
+          rank: us.rank || "Unrated",
+          avatar: us.avatar || "",
+          isFollowing: true,
+          lastSeen: new Date().toISOString()
+        });
+      }
     }
-    // console.log(str);
-    str=str.slice(0,str.length-1);
-    console.log(str);
-    const objresf=await fetch(`https://codeforces.com/api/user.info?handles=${str}`);
-    // setTimeout(()=>{},2000);
-    const objf=objresf.ok?await objresf.json():[];
-    // console.log(objf);
-    for(const us of objf?.result)
-    {
+    
+    // Add this part to handle users not found in Codeforces API
+    // Make sure all followed users are included even if they don't exist in Codeforces
+    const foundHandles = new Set(Friends.filter(f => f.isFollowing).map(f => f.handle));
+    for (const followedHandle of arr) {
+      if (!foundHandles.has(followedHandle)) {
+        Friends.push({
+          handle: followedHandle,
+          rating: 0,
+          rank: "Unknown",
+          avatar: "",
+          isFollowing: true,
+          lastSeen: new Date().toISOString()
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching following users from Codeforces:", error);
+    
+    // If the API call fails, still add the followed users to the list
+    for (const followedHandle of arr) {
       Friends.push({
-        handle:us.handle,
-        rating:us.rating,
-        rank:us.rank,
-        avatar:us.avatar,
-        isFollowing:true,
-        
+        handle: followedHandle,
+        rating: 0,
+        rank: "Unknown",
+        avatar: "",
+        isFollowing: true,
+        lastSeen: new Date().toISOString()
       });
     }
+  }
+}
     return {
       rawSubmissions: submissionsData.result || [],
       rawContests: contestsData.result || [],
       rawPastContestData: pastContestData.result || [],
       rawProfileData: arrProfileData || [],
-      rawFriends:Friends||[],
+      rawFriends: Friends || [],
     };
   } catch (error) {
     console.log('Error fetching server data:', error);
@@ -117,7 +154,7 @@ export async function fetchServerData(handle?: string) {
       rawContests: [],
       rawPastContestData: [],
       rawProfileData: [],
-      rawFriends:[],
+      rawFriends: [],
     };
   }
 }
