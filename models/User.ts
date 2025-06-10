@@ -15,15 +15,15 @@ export interface IUser extends Document {
 }
 
 const UserSchema = new mongoose.Schema<IUser>({
-  username: { type: string, required: true, unique: true },
-  password: { type: string, required: true },
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
   isPrivate: { type: Boolean, required: true, default: true },
-  aboutme: { type: string, default: '' },
-  links: { type: [string], default: [] },
-  follower: { type: [string], default: [] },
-  following: { type: [string], default: [] },
-  requestSent: { type: [string], default: [] },
-  requestRecieved: { type: [string], default: [] },
+  aboutme: { type: String, default: '' },
+  links: { type: [String], default: [] },
+  follower: { type: [String], default: [] },
+  following: { type: [String], default: [] },
+  requestSent: { type: [String], default: [] },
+  requestRecieved: { type: [String], default: [] },
 });
 
 const UserModel: Model<IUser> =

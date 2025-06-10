@@ -125,7 +125,7 @@ export const mockProblems: Problem[] = Array.from({ length: 200 }, (_, i) => {
 });
 
 // Generate mock submissions
-export const mockSubmissions: Submission[] = Array.from(
+export const mockSubmissions: any[] = Array.from(
   { length: 150 },
   (_, i) => {
     const problem =
@@ -218,13 +218,13 @@ export const mockFriends: Friend[] = Array.from({ length: 15 }, (_, i) => {
   if (activityType === 'SOLVED') {
     const problem =
       mockProblems[Math.floor(Math.random() * mockProblems.length)];
-    recentActivity.problemId = problem.id;
-    recentActivity.problemName = problem.name;
+    if(recentActivity!==undefined){recentActivity.problemId = problem.id;
+    recentActivity.problemName = problem.name;}
   } else if (activityType === 'PARTICIPATED') {
     const contest =
       mockContests[Math.floor(Math.random() * mockContests.length)];
-    recentActivity.contestId = contest.id;
-    recentActivity.contestName = contest.name;
+    if(recentActivity!==undefined){recentActivity.contestId = contest.id.toString();
+    recentActivity.contestName = contest.name;}
   }
 
   const handles = [
