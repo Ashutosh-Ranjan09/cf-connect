@@ -229,7 +229,7 @@ export async function DELETE(request: NextRequest) {
         { $pull: { requestRecieved: username } },
         { new: true, runValidators: true }
       );
-
+      console.log(res1);
       const res2 = await UserModel.findOneAndUpdate(
         { username: username },
         { $pull: { requestSent: currentUser } },
