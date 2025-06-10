@@ -3,27 +3,27 @@ import { boolean } from 'zod';
 
 export interface IUser extends Document {
   _id: Types.ObjectId;
-  username: String;
-  password: String; // hashed
+  username: string;
+  password: string; // hashed
   isPrivate: Boolean;
-  aboutme: String;
-  links: String[];
-  following: String[];
-  follower: String[];
-  requestSent: String[];
-  requestRecieved: String[];
+  aboutme: string;
+  links: string[];
+  following: string[];
+  follower: string[];
+  requestSent: string[];
+  requestRecieved: string[];
 }
 
 const UserSchema = new mongoose.Schema<IUser>({
-  username: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  username: { type: string, required: true, unique: true },
+  password: { type: string, required: true },
   isPrivate: { type: Boolean, required: true, default: true },
-  aboutme: { type: String, default: '' },
-  links: { type: [String], default: [] },
-  follower: { type: [String], default: [] },
-  following: { type: [String], default: [] },
-  requestSent: { type: [String], default: [] },
-  requestRecieved: { type: [String], default: [] },
+  aboutme: { type: string, default: '' },
+  links: { type: [string], default: [] },
+  follower: { type: [string], default: [] },
+  following: { type: [string], default: [] },
+  requestSent: { type: [string], default: [] },
+  requestRecieved: { type: [string], default: [] },
 });
 
 const UserModel: Model<IUser> =

@@ -1,6 +1,6 @@
 // app/dashboard/layout.tsx
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/app/api/auth/[...nextauth]/auth';
 import { fetchServerData } from '@/lib/server-api';
 import { Providers } from '@/app/providers';
 
@@ -9,8 +9,9 @@ export default async function ProfileLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { username: string };
+  params: Promise<{ username: string }>;
 }) {
+  // params is a Promise in Next.js 15+
   const { username } = await params;
 
   const handle = username;

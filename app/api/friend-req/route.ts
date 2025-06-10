@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-     await UserModel.findOne(
+     const res1=await UserModel.findOne(
       { username: username }
       //   { new: true, runValidators: true }
     );
@@ -229,7 +229,7 @@ export async function DELETE(request: NextRequest) {
         { $pull: { requestRecieved: username } },
         { new: true, runValidators: true }
       );
-      console.log(res1);
+      // console.log(res1);
        await UserModel.findOneAndUpdate(
         { username: username },
         { $pull: { requestSent: currentUser } },

@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
     // ⚠️ Allows builds to succeed even with lint errors.
     ignoreDuringBuilds: true,
   },
+  // typescript: {
+  //   // ⚠️ allows `next build` to succeed even with TS errors
+  //   ignoreBuildErrors: true,
+  // },
 };
 
 export default nextConfig;
