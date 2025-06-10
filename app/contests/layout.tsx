@@ -15,5 +15,5 @@ export default async function ContestsLayout({
   const serverData = handle ? await fetchServerData(handle) : {};
   // console.log("Contests layout server data:", serverData);
 
-  return <Providers serverData={serverData}>{children}</Providers>;
+  return <Providers serverData={serverData as any}>{children}</Providers>;
 }

@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error signup');
+    console.error('Error signup', error);
     return Response.json(
       {
         success: false,
@@ -34,6 +34,41 @@ export async function POST(request: Request) {
       {
         status: 500,
       }
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  await dbConnect();
+  try {
+    const { username, newPassword } = await request.json();
+
+    // Find the user
+    const user = await UserModel.findOne({ username });
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password
+    user.password = hashedPassword;
+    await user.save();
+
+    return NextResponse.json(
+      { success: true, message: 'Password updated successfully' },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Error updating password:', error);
+    return NextResponse.json(
+      { success: false, message: 'Error updating password' },
+      { status: 500 }
     );
   }
 }

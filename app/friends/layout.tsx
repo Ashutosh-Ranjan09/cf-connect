@@ -16,5 +16,5 @@ export default async function FriendLayout({
   const serverData = handle ? await fetchServerData(handle) : {};
   // console.log(serverData);
 
-  return <Providers serverData={serverData}>{children}</Providers>;
+  return <Providers serverData={serverData as any}>{children}</Providers>;
 }

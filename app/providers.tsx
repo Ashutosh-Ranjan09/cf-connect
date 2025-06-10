@@ -15,7 +15,7 @@ import {
   mockSubmissions,
   transformSubmissions,
   transformProblems,
-  transformFriends,
+  // transformFriends,
 } from '@/lib/mockData';
 
 // Auth Context
@@ -29,7 +29,7 @@ type User = {
 };
 interface DataProviderProps {
   children: ReactNode;
-  serverData: {
+  serverData?: {
     rawSubmissions: any[];
     rawContests: any[];
     rawPastContestData?: any[];
@@ -42,6 +42,7 @@ type AuthContextType = {
   login: (handle: string, password: string) => Promise<boolean>;
   logout: () => void;
   signup: (handle: string, password: string) => Promise<boolean>;
+  resetPassword: (handle: string, newPassword: string) => Promise<boolean>;
   isLoading: boolean;
 };
 
@@ -244,9 +245,34 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
       return false;
     }
   };
+const resetPassword = async (handle: string, newPassword: string) => {
+    try {
+      const res = await axios.patch('/api/signup', {
+        username: handle,
+        newPassword,
+      });
+
+      if (res.status === 200 && res.data.success === true) {
+        // console.log('Password reset success');
+        return true;
+      } else {
+        return false;
+      }
+    } catch (err) {
+      console.error('Password reset failed:', err);
+      return false;
+    }
+  };
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, signup, isLoading: isAuthLoading }}
+      value={{
+        user,
+        login,
+        logout,
+        signup,
+        resetPassword,
+        isLoading: isAuthLoading,
+      }}
     >
       {children}
     </AuthContext.Provider>

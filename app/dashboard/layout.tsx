@@ -15,5 +15,5 @@ export default async function DashboardLayout({
   // Fetch data from server if user is authenticated
   const serverData = handle ? await fetchServerData(handle) : {};
   // console.log(serverData);
-  return <Providers serverData={serverData}>{children}</Providers>;
+  return <Providers serverData={serverData as any}>{children}</Providers>;
 }
