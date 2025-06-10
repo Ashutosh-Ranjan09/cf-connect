@@ -24,12 +24,12 @@ export async function POST(request: NextRequest) {
     const recUser=await UserModel.findOne({username:reciever});
     if(recUser?.isPrivate===false)// test this
     {
-      const res1 = await UserModel.findOneAndUpdate(
+       await UserModel.findOneAndUpdate(
       { username: sender },
       { $addToSet: { following: reciever } },
       { new: true, runValidators: true }
     );
-    const res2 = await UserModel.findOneAndUpdate(
+     await UserModel.findOneAndUpdate(
       { username: reciever },
       { $addToSet: { follower: sender } },
       { new: true, runValidators: true }
@@ -40,12 +40,12 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
     }
-    const res1 = await UserModel.findOneAndUpdate(
+     await UserModel.findOneAndUpdate(
       { username: sender },
       { $addToSet: { requestSent: reciever } },
       { new: true, runValidators: true }
     );
-    const res2 = await UserModel.findOneAndUpdate(
+     await UserModel.findOneAndUpdate(
       { username: reciever },
       { $addToSet: { requestRecieved: sender } },
       { new: true, runValidators: true }
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const res1 = await UserModel.findOne(
+     await UserModel.findOne(
       { username: username }
       //   { new: true, runValidators: true }
     );
@@ -161,7 +161,7 @@ if (!user) {
 }
 
 // If username exists, update both arrays
-const res1 = await UserModel.findOneAndUpdate(
+ await UserModel.findOneAndUpdate(
   { username: sender },
   { 
     $pull: { requestSent: username },
@@ -224,13 +224,13 @@ export async function DELETE(request: NextRequest) {
     // Handle different actions
     if (action === 'reject') {
       // Reject a follow request - remove from requestRecieved and requestSent
-      const res1 = await UserModel.findOneAndUpdate(
+       await UserModel.findOneAndUpdate(
         { username: currentUser },
         { $pull: { requestRecieved: username } },
         { new: true, runValidators: true }
       );
       console.log(res1);
-      const res2 = await UserModel.findOneAndUpdate(
+       await UserModel.findOneAndUpdate(
         { username: username },
         { $pull: { requestSent: currentUser } },
         { new: true, runValidators: true }
@@ -242,13 +242,13 @@ export async function DELETE(request: NextRequest) {
       );
     } else if (action === 'cancel') {
       // Cancel a sent request - remove from requestSent and requestRecieved
-      const res1 = await UserModel.findOneAndUpdate(
+       await UserModel.findOneAndUpdate(
         { username: currentUser },
         { $pull: { requestSent: username } },
         { new: true, runValidators: true }
       );
 
-      const res2 = await UserModel.findOneAndUpdate(
+       await UserModel.findOneAndUpdate(
         { username: username },
         { $pull: { requestRecieved: currentUser } },
         { new: true, runValidators: true }
@@ -260,13 +260,13 @@ export async function DELETE(request: NextRequest) {
       );
     } else {
       // Default action: unfollow - remove from following and follower
-      const res1 = await UserModel.findOneAndUpdate(
+       await UserModel.findOneAndUpdate(
         { username: currentUser },
         { $pull: { following: username } },
         { new: true, runValidators: true }
       );
 
-      const res2 = await UserModel.findOneAndUpdate(
+       await UserModel.findOneAndUpdate(
         { username: username },
         { $pull: { follower: currentUser } },
         { new: true, runValidators: true }
