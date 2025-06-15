@@ -92,12 +92,12 @@ export const Sidebar = () => {
             active={pathname === '/friends'}
           />
 
-          <SidebarItem
+          {/* <SidebarItem
             href="/leaderboard"
             icon={<Trophy className="h-5 w-5" />}
             title="Leaderboard"
             active={pathname === '/leaderboard'}
-          />
+          /> */}
 
           <SidebarItem
             href="/contests"

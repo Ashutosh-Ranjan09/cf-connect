@@ -9,17 +9,17 @@ export async function fetchServerData(handle?: string) {
     // Fetch submissions with appropriate revalidation
     const submissionsResponse = await fetch(
       `https://codeforces.com/api/user.status?handle=${handle}`,
-      { next: { revalidate: 30 } }
+      { next: { revalidate: 30 },cache: 'no-store' }
     );
 
     // Fetch contests with appropriate revalidation
     const contestsResponse = await fetch(
       'https://codeforces.com/api/contest.list',
-      { next: { revalidate: 3600 } }
+      { next: { revalidate: 3600 },cache: 'no-store' }
     );
     const pastContestResponse = await fetch(
       `https://codeforces.com/api/user.rating?handle=${handle}`,
-      { next: { revalidate: 300 } }
+      { next: { revalidate: 300 },cache: 'no-store' }
     );
     const submissionsData = submissionsResponse.ok
       ? await submissionsResponse.json()
@@ -32,7 +32,7 @@ export async function fetchServerData(handle?: string) {
       : { result: [] };
     const profile = await fetch(
       `https://codeforces.com/api/user.info?handles=${handle}`,
-      { next: { revalidate: 1 } }
+      { next: { revalidate: 1 },cache: 'no-store' }
     );
     await dbConnect();
     const dbprofile = await UserModel.findOne({ username: handle });

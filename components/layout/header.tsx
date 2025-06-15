@@ -18,6 +18,8 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/app/providers';
 import { Sidebar } from './sidebar';
 import { getRatingColor } from '@/lib/utils';
+import axios from 'axios';
+import { get } from 'lodash';
 
 export const Header = () => {
   const { user, logout } = useAuth();
@@ -25,13 +27,23 @@ export const Header = () => {
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
-
+  const [avatar, setAvatar] = useState('/default-avatar.png');
   // Handle hydration mismatch with theme
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Handle scroll for header background
+  useEffect(() => {
+    async function getAvatar() {
+      const res = await axios.get('/api/account');
+      const data=res.data;
+      if (data && data.avatar) {
+        console.log('Avatar URL:', data.avatar);
+        setAvatar(data.avatar);
+      }
+    }
+     getAvatar();
+  },[])
+  
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -114,7 +126,7 @@ export const Header = () => {
                     className="relative h-8 w-8 rounded-full"
                   >
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatar} alt={user.handle} />
+                      <AvatarImage src={avatar} alt={user.handle} />
                       <AvatarFallback>
                         {user.handle.substring(0, 2).toUpperCase()}
                       </AvatarFallback>

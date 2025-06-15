@@ -48,6 +48,7 @@ import {
 import { AppShell } from '@/components/layout/app-shell';
 import { Textarea } from '@/components/ui/textarea';
 import axios from 'axios';
+import Image from 'next/image';
 // import { useToast } from '@/hooks/use-toast';
 type UserProfile = {
   handle: string;
@@ -471,9 +472,11 @@ export default function ProfilePage() {
             <CardHeader className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2 sm:pb-3">
               <div className="flex flex-col items-center gap-2 sm:gap-4">
                 <div className="relative">
-                  <img
+                  <Image
                     src={profile.avatar}
                     alt={profile.handle}
+                    width={96}
+                    height={96}
                     className="rounded-full h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 object-cover border-3 sm:border-4 border-background"
                   />
                   <div
@@ -726,25 +729,35 @@ export default function ProfilePage() {
               </div>
 
               {!isOwnProfile && (
-                <Button
-                  className="w-full"
-                  variant={isFollowing ? 'outline' : 'default'}
-                  onClick={handleFollowAction}
-                  disabled={followLoading}
-                >
-                  {followLoading ? (
-                    <span className="flex items-center">
-                      <span className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full"></span>
-                      Processing...
-                    </span>
-                  ) : isFollowing ? (
-                    'Unfollow'
-                  ) : requestSent ? (
-                    'Requested'
-                  ) : (
-                    'Follow'
-                  )}
-                </Button>
+                <>
+                  <Button
+                    className="w-full"
+                    variant={isFollowing ? 'outline' : 'default'}
+                    onClick={handleFollowAction}
+                    disabled={followLoading}
+                  >
+                    {followLoading ? (
+                      <span className="flex items-center">
+                        <span className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full"></span>
+                        Processing...
+                      </span>
+                    ) : isFollowing ? (
+                      'Unfollow'
+                    ) : requestSent ? (
+                      'Requested'
+                    ) : (
+                      'Follow'
+                    )}
+                  </Button>
+                  {/* Dashboard Redirect Button */}
+                  <Button
+                    className="w-full mt-2"
+                    variant="secondary"
+                    onClick={() => router.push(`/dashboard/${username}`)}
+                  >
+                    View Dashboard
+                  </Button>
+                </>
               )}
             </CardContent>
           </Card>

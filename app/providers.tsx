@@ -21,6 +21,7 @@ import {
 // Auth Context
 type User = {
   handle: string;
+  isPrivate: boolean;
   avatar: string;
   email: string;
   rating: number;
@@ -48,6 +49,7 @@ type AuthContextType = {
 
 const defaultUser: User = {
   handle: 'tourist',
+  isPrivate: true,
   avatar: 'https://avatars.githubusercontent.com/u/16591379?v=4',
   email: 'tourist@codeforces.com',
   rating: 3800,
@@ -160,6 +162,10 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
             ...defaultUser,
             handle: session.user.username || 'guest',
             // email: session.user.email || 'user@example.com',
+            isPrivate: session.user.isPrivate || false,
+            avatar: session.user.image || defaultUser.avatar,
+            rating: session.user.rating || defaultUser.rating,
+            rank: session.user.rank || defaultUser.rank,
             isAuthenticated: true,
           });
         } else {
