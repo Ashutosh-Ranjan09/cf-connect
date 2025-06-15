@@ -70,7 +70,8 @@ export default function ContestsPage() {
       setLocalContests(contests);
 
       // Filter upcoming, ongoing, and past contests
-      setUpcomingContests(contests.filter((c) => c.phase === 'BEFORE'));
+      setUpcomingContests(contests.filter((c) => c.phase === 'BEFORE').sort((a, b) => a.startTimeSeconds - b.startTimeSeconds)
+          .slice(0, 10));
       setOngoingContests(
         contests.filter(
           (c) =>

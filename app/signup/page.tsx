@@ -155,7 +155,7 @@ export default function SignupPage() {
       // console.log(typeof verificationCode, typeof res.data.result[0].firstName);
       // console.log(res?.data?.result[0]?.firstName);
       if (
-        res.data.result[0].firstName == verificationCode ||
+        res.data.result[0].firstName === verificationCode ||
         res.data.result[0].handle === 'AR009'
       ) {
         toast({
