@@ -14,6 +14,12 @@ const nextConfig: NextConfig = {
   //   // ⚠️ allows `next build` to succeed even with TS errors
   //   ignoreBuildErrors: true,
   // },
+  images: {
+    domains: [
+      'userpic.codeforces.org',
+      // add other domains if needed
+    ],
+  },
 };
 
 export default nextConfig;
