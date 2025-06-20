@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronRight,
   Settings,
+  TrendingUp,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -84,7 +85,12 @@ export const Sidebar = () => {
             title="Profile"
             active={pathname.startsWith('/profile')}
           />
-
+          <SidebarItem
+            href="/recommendations"
+            icon={<TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />}
+            title="Recommendations"
+            active={pathname === '/recommendations'}
+          />
           <SidebarItem
             href="/friends"
             icon={<Users className="h-5 w-5" />}

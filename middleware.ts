@@ -12,8 +12,8 @@ export async function middleware(request: NextRequest) {
       url.pathname.startsWith('/profile') ||
       url.pathname.startsWith('/friends') ||
       url.pathname.startsWith('/contests') ||
-      url.pathname.startsWith('/leaderboard'))
-  ) {
+      url.pathname.startsWith('/leaderboard') ||
+      url.pathname.startsWith('/recommendations')) ){
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
@@ -36,6 +36,7 @@ export const config = {
     '/dashboard/:path*',
     '/profile/:path*',
     '/friends/:path*',
+    '/recommendations/:path*',
     '/contests/:path*',
     '/leaderboard/:path*',
   ],

@@ -60,6 +60,7 @@ export const Header = () => {
     if (pathname.startsWith('/friends')) return 'Friends';
     if (pathname.startsWith('/leaderboard')) return 'Leaderboard';
     if (pathname.startsWith('/contests')) return 'Contests';
+    if (pathname.startsWith('/recommendations')) return 'Recommendations';
     return 'CF-Connect';
   };
 
