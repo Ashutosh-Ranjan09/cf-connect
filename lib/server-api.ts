@@ -52,94 +52,54 @@ export async function fetchServerData(handle?: string) {
     const arrProfileData = [profileData2];
     // console.log("raw-submission-server-api.ts= ",contestsData);
 
+    // Build sets for fast lookup
+    const followersArr = dbprofile?.follower || [];
+    const followingArr = dbprofile?.following || [];
+    const followersSet = new Set(followersArr);
+    const followingSet = new Set(followingArr);
+    // Union of all handles
+    const allHandles = Array.from(new Set([...followersArr, ...followingArr]));
     let Friends = [];
-    let str = '';
-    // console.log(str,dbprofile?.follower);
-
-    let arr = dbprofile?.follower || [];
-    if(arr.length>0)
-    {
-    for (let s of arr) {
-      // console.log(s);
-      str += `${s};`;
-    }
-    // console.log(str);
-    str = str.slice(0, str.length - 1);
-    console.log(str);
-    const objres = await fetch(
-      `https://codeforces.com/api/user.info?handles=${str}`
-    );
-    const obj = objres.ok ? await objres.json() : [];
-    console.log(obj);
-    for (const us of obj.result) {
-      Friends.push({
-        handle: us.handle,
-        rating: us.rating,
-        rank: us.rank,
-        avatar: us.avatar,
-        isFollowing: false,
-      });
-    }
-  }
- arr = dbprofile?.following || [];
-if (arr.length > 0) {
-  str = '';
-  for (let s of arr) {
-    str += `${s};`;
-  }
-  str = str.slice(0, str.length - 1);
-  
-  try {
-    const objresf = await fetch(
-      `https://codeforces.com/api/user.info?handles=${str}`
-    );
-    
-    const objf = objresf.ok ? await objresf.json() : { result: [] };
-    
-    if (objf && objf.result && Array.isArray(objf.result)) {
-      for (const us of objf.result) {
-        Friends.push({
-          handle: us.handle,
-          rating: us.rating || 0,
-          rank: us.rank || "Unrated",
-          avatar: us.avatar || "",
-          isFollowing: true,
-          lastSeen: new Date().toISOString()
-        });
+    if (allHandles.length > 0) {
+      let str = allHandles.join(';');
+      try {
+        const objres = await fetch(
+          `https://codeforces.com/api/user.info?handles=${str}`
+        );
+        const obj = objres.ok ? await objres.json() : { result: [] };
+        const cfData: Record<string, any> = {};
+        for (const us of obj.result) {
+          cfData[us.handle] = us;
+        }
+        for (const handle of allHandles) {
+          const isFollowing = followingSet.has(handle);
+          const isFollower = followersSet.has(handle);
+          const us = cfData[handle] || {};
+          Friends.push({
+            handle,
+            rating: us.rating || 0,
+            rank: us.rank || 'Unknown',
+            avatar: us.avatar || '',
+            isFollowing: !!isFollowing,
+            isFollower: !!isFollower,
+            lastSeen: new Date().toISOString(),
+          });
+        }
+      } catch (error) {
+        // fallback: add all handles with minimal info
+        for (const handle of allHandles) {
+          Friends.push({
+            handle,
+            rating: 0,
+            rank: 'Unknown',
+            avatar: '',
+            isFollowing: followingSet.has(handle),
+            isFollower: followersSet.has(handle),
+            lastSeen: new Date().toISOString(),
+          });
+        }
       }
     }
-    
-    // Add this part to handle users not found in Codeforces API
-    // Make sure all followed users are included even if they don't exist in Codeforces
-    const foundHandles = new Set(Friends.filter(f => f.isFollowing).map(f => f.handle));
-    for (const followedHandle of arr) {
-      if (!foundHandles.has(followedHandle)) {
-        Friends.push({
-          handle: followedHandle,
-          rating: 0,
-          rank: "Unknown",
-          avatar: "",
-          isFollowing: true,
-          lastSeen: new Date().toISOString()
-        });
-      }
-    }
-  } catch (error) {
-    console.error("Error fetching following users from Codeforces:", error);
-    
-    // If the API call fails, still add the followed users to the list
-    for (const followedHandle of arr) {
-      Friends.push({
-        handle: followedHandle,
-        rating: 0,
-        rank: "Unknown",
-        avatar: "",
-        isFollowing: true,
-        lastSeen: new Date().toISOString()
-      });
-    }
-  }
-}
     return {
       rawSubmissions: submissionsData.result || [],
       rawContests: contestsData.result || [],

@@ -81,23 +81,38 @@ export default function FriendsPage() {
   
   // Toggle friend follow status
   const toggleFollow = async (handle: string, currentStatus: 'none' | 'following' | 'requested') => {
+    // Check if already following or request sent
+    const friend = friends.find(f => f.handle === handle);
+    if (friend?.isFollowing) {
+      toast({
+        title: 'Already Following',
+        description: `You are already following ${handle}.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+    // If you have already sent a request
+    if (user && Array.isArray((user as any).requestSent) && (user as any).requestSent.includes(handle)) {
+      toast({
+        title: 'Request Already Sent',
+        description: `You have already sent a follow request to ${handle}.`,
+        variant: 'destructive',
+      });
+      return;
+    }
   try {
     setActionLoading(handle);
     
     if (currentStatus === 'none') {
       // Send follow request
       const response = await axios.post('/api/friend-req', { reciever: handle });
-      
       if (response.data.success) {
         if (response.data.message === 'Request sent') {
-          // Private account - request sent
           toast({
             title: 'Request Sent',
             description: `Follow request sent to ${handle}`,
           });
-          // No UI update needed for private accounts
         } else {
-          // Public account - immediately followed
           toast({
             title: 'Following',
             description: `You are now following ${handle}`,
@@ -110,6 +125,7 @@ export default function FriendsPage() {
             rank: "", // You might want to get this from the search results
             avatar: "",
             isFollowing: true,
+            isFollower: false,
             lastSeen: new Date().toISOString()
           };
           
@@ -120,6 +136,14 @@ export default function FriendsPage() {
           // Force refresh browser page to get fresh data from server
           window.location.reload();
         }
+      } else {
+        toast({
+          title: 'Error',
+          description: response.data.message || 'Could not follow user.',
+          variant: response.data.message && response.data.message.includes('Follow request already sent') ? undefined : 'destructive',
+        });
+        setActionLoading(null);
+        return;
       }
     } else if (currentStatus === 'following') {
       // Unfollow
@@ -153,9 +177,13 @@ export default function FriendsPage() {
     fetchFollowRequests();
     
   } catch (error) {
+    // Fix: cast error to any for Axios error compatibility
+    let backendMsg = (error && typeof error === 'object' && 'response' in error && (error as any).response?.data?.message)
+      ? (error as any).response.data.message
+      : undefined;
     toast({
       title: 'Error',
-      description: 'An error occurred. Please try again.',
+      description: backendMsg || 'An error occurred. Please try again.',
       variant: 'destructive',
     });
   } finally {
@@ -368,7 +396,7 @@ export default function FriendsPage() {
                   </TabsContent>
 
                   <TabsContent value="followers" className="space-y-4">
-                    {filteredFriends.filter((friend) => !friend.isFollowing)
+                    {filteredFriends.filter((friend) => friend.isFollower)
                       .length === 0 ? (
                       <div className="text-center py-4 sm:py-6">
                         <Users className="h-8 w-8 mx-auto text-muted-foreground opacity-50" />
@@ -379,7 +407,7 @@ export default function FriendsPage() {
                     ) : (
                       <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2">
                         {filteredFriends
-                          .filter((friend) => !friend.isFollowing)
+                          .filter((friend) => friend.isFollower)
                           .map((friend) => (
                             <div
                               key={friend.handle}
@@ -420,18 +448,20 @@ export default function FriendsPage() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 mt-2 sm:mt-0 self-end sm:self-auto flex-shrink-0">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-7 text-xs w-full sm:w-auto"
-                                  onClick={() => toggleFollow(friend.handle,'none')}
-                                >
-                                  <UserPlus className="h-3 w-3 mr-1" />
-                                  <span className="hidden sm:inline">
-                                    Follow
-                                  </span>
-                                  <span className="sm:hidden">Follow</span>
-                                </Button>
+                                {!friend.isFollowing && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 text-xs w-full sm:w-auto"
+                                    onClick={() => toggleFollow(friend.handle,'none')}
+                                  >
+                                    <UserPlus className="h-3 w-3 mr-1" />
+                                    <span className="hidden sm:inline">
+                                      Follow
+                                    </span>
+                                    <span className="sm:hidden">Follow</span>
+                                  </Button>
+                                )}
                                 <Button
                                   variant="ghost"
                                   size="icon"

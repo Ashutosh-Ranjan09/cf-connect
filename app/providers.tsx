@@ -120,7 +120,7 @@ export type Friend = {
   rank: string;
   avatar: string;
   isFollowing: boolean;
-  // isFollower?:boolean;
+  isFollower: boolean;
   lastSeen: string;
   recentActivity?: {
     type: 'SOLVED' | 'PARTICIPATED' | 'RANKED_UP';

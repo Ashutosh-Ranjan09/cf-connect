@@ -21,36 +21,67 @@ export async function POST(request: NextRequest) {
       );
     }
     const sender = token.username as string;
-    const recUser=await UserModel.findOne({username:reciever});
-    if(recUser?.isPrivate===false)// test this
-    {
-       await UserModel.findOneAndUpdate(
-      { username: sender },
-      { $addToSet: { following: reciever } },
-      { new: true, runValidators: true }
-    );
-     await UserModel.findOneAndUpdate(
-      { username: reciever },
-      { $addToSet: { follower: sender } },
-      { new: true, runValidators: true }
-    );
-
-    return NextResponse.json(
-      { success: true, message: 'Following this user' },
-      { status: 200 }
-    );
+    if (sender === reciever) {
+      return NextResponse.json(
+        { success: false, message: 'You cannot follow yourself.' },
+        { status: 400 }
+      );
     }
-     await UserModel.findOneAndUpdate(
+    const senderUser = await UserModel.findOne({ username: sender });
+    const recUser = await UserModel.findOne({ username: reciever });
+    if (!recUser) {
+      return NextResponse.json(
+        { success: false, message: 'User not found' },
+        { status: 404 }
+      );
+    }
+    // Check if already following
+    if (senderUser?.following?.includes(reciever)) {
+      return NextResponse.json(
+        { success: false, message: 'Already following this user' },
+        { status: 400 }
+      );
+    }
+    // Check if request already sent
+    if (senderUser?.requestSent?.includes(reciever)) {
+      return NextResponse.json(
+        { success: false, message: 'Follow request already sent' },
+        { status: 400 }
+      );
+    }
+    // Check if you have a pending request from them
+    if (senderUser?.requestRecieved?.includes(reciever)) {
+      return NextResponse.json(
+        { success: false, message: 'You have a pending request from this user' },
+        { status: 400 }
+      );
+    }
+    if (recUser?.isPrivate === false) {
+      await UserModel.findOneAndUpdate(
+        { username: sender },
+        { $addToSet: { following: reciever } },
+        { new: true, runValidators: true }
+      );
+      await UserModel.findOneAndUpdate(
+        { username: reciever },
+        { $addToSet: { follower: sender } },
+        { new: true, runValidators: true }
+      );
+      return NextResponse.json(
+        { success: true, message: 'Following this user' },
+        { status: 200 }
+      );
+    }
+    await UserModel.findOneAndUpdate(
       { username: sender },
       { $addToSet: { requestSent: reciever } },
       { new: true, runValidators: true }
     );
-     await UserModel.findOneAndUpdate(
+    await UserModel.findOneAndUpdate(
       { username: reciever },
       { $addToSet: { requestRecieved: sender } },
       { new: true, runValidators: true }
     );
-
     return NextResponse.json(
       { success: true, message: 'Request sent' },
       { status: 200 }
