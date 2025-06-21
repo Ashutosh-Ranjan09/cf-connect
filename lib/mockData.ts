@@ -263,6 +263,7 @@ export const mockFriends: Friend[] = Array.from({ length: 15 }, (_, i) => {
     rank: getRank(rating),
     avatar: `https://avatars.githubusercontent.com/u/${10000 + i}?v=4`,
     isFollowing: Math.random() > 0.3,
+    isFollower: Math.random() > 0.3,
     lastSeen: randomDate(7, 0),
     recentActivity,
   };
