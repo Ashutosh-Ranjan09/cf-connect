@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
 export default function SettingsPage() {
+  const { logout } = useAuth();
   
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -48,8 +49,9 @@ export default function SettingsPage() {
             <span className="font-medium">Private Profile</span>
             <Switch checked={isPrivate} onCheckedChange={handlePrivacyToggle} disabled={loading} />
           </div>
-          <div>
+          <div className="flex gap-4">
             <Button variant="outline" onClick={() => router.push('/forgot-password')}>Reset Password</Button>
+            <Button variant="destructive" onClick={logout}>Log Out</Button>
           </div>
         </CardContent>
       </Card>
