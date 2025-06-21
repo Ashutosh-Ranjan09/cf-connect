@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
   if (!userRating) {
     try {
       const cfRes = await axiosInstance.get(`https://codeforces.com/api/user.info?handles=${userHandle}`);
-      userRating = cfRes.data.result[0]?.rating || 1200;
+      userRating = cfRes.data.result[0]?.rating || 800;
     } catch (e) {
       userRating = 1200;
     }

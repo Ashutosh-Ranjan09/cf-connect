@@ -27,22 +27,22 @@ export const Header = () => {
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
-  const [avatar, setAvatar] = useState('/default-avatar.png');
+  // const [avatar, setAvatar] = useState('/default-avatar.png');
   // Handle hydration mismatch with theme
   useEffect(() => {
     setMounted(true);
   }, []);
-  useEffect(() => {
-    async function getAvatar() {
-      const res = await axios.get('/api/account');
-      const data=res.data;
-      if (data && data.avatar) {
-        console.log('Avatar URL:', data.avatar);
-        setAvatar(data.avatar);
-      }
-    }
-     getAvatar();
-  },[])
+  // useEffect(() => {
+  //   async function getAvatar() {
+  //     const res = await axios.get('/api/account');
+  //     const data=res.data;
+  //     if (data && data.avatar) {
+  //       console.log('Avatar URL:', data.avatar);
+  //       setAvatar(data.avatar);
+  //     }
+  //   }
+  //    getAvatar();
+  // },[])
   
   useEffect(() => {
     const handleScroll = () => {

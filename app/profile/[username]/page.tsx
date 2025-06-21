@@ -49,6 +49,7 @@ import { AppShell } from '@/components/layout/app-shell';
 import { Textarea } from '@/components/ui/textarea';
 import axios from 'axios';
 import Image from 'next/image';
+import { Toaster } from '@/components/ui/toaster';
 // import { useToast } from '@/hooks/use-toast';
 type UserProfile = {
   handle: string;
@@ -467,6 +468,7 @@ export default function ProfilePage() {
   return (
     <AppShell>
       <div className="container mx-auto py-3 sm:py-4 md:py-6 px-2 sm:px-4">
+        <Toaster />
         <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6 md:grid-cols-3">
           <Card className="md:col-span-1">
             <CardHeader className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2 sm:pb-3">

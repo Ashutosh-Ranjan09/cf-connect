@@ -96,9 +96,9 @@ export default function DashboardPage() {
               <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
                 {stats.totalSolved}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              {/* <p className="text-xs text-muted-foreground mt-1">
                 +12 from last month
-              </p>
+              </p> */}
             </CardContent>
           </Card>
 
@@ -112,9 +112,9 @@ export default function DashboardPage() {
               <div className="text-2xl sm:text-3xl font-bold">
                 {stats.totalSubmissions}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              {/* <p className="text-xs text-muted-foreground mt-1">
                 +43 from last month
-              </p>
+              </p> */}
             </CardContent>
           </Card>
 
@@ -128,9 +128,9 @@ export default function DashboardPage() {
               <div className="text-2xl sm:text-3xl font-bold">
                 {stats.acceptedRate}%
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              {/* <p className="text-xs text-muted-foreground mt-1">
                 +2% from last month
-              </p>
+              </p> */}
             </CardContent>
           </Card>
 
@@ -144,9 +144,9 @@ export default function DashboardPage() {
               <div className="text-2xl sm:text-3xl font-bold">
                 {stats.averageAttempts}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              {/* <p className="text-xs text-muted-foreground mt-1">
                 -0.3 from last month
-              </p>
+              </p> */}
             </CardContent>
           </Card>
         </div>
@@ -156,7 +156,7 @@ export default function DashboardPage() {
             <TabsTrigger value="charts" className="flex-1 text-xs sm:text-sm">
               Performance Charts
             </TabsTrigger>
-            <TabsTrigger
+            {/* <TabsTrigger
               value="recommendations"
               className="flex-1 text-xs sm:text-sm"
             >
@@ -164,7 +164,7 @@ export default function DashboardPage() {
             </TabsTrigger>
             <TabsTrigger value="activity" className="flex-1 text-xs sm:text-sm">
               Recent Activity
-            </TabsTrigger>
+            </TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="charts" className="mt-3 sm:mt-4 md:mt-6">
@@ -213,7 +213,7 @@ export default function DashboardPage() {
             </div>
           </TabsContent>
 
-          <TabsContent value="recommendations" className="mt-6">
+          {/* <TabsContent value="recommendations" className="mt-6">
             <Card>
               <CardHeader className="pb-2 sm:pb-4">
                 <CardTitle className="text-base sm:text-lg">
@@ -253,7 +253,7 @@ export default function DashboardPage() {
                 <p className="text-muted-foreground">Coming soon...</p>
               </CardContent>
             </Card>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </div>
     </AppShell>

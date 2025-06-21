@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/form';
 import { useAuth } from '@/app/providers';
 import { useToast } from './../../hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 
 // Form schema
 const loginSchema = z.object({
@@ -77,6 +78,7 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-10 md:py-12 flex min-h-screen flex-col items-center justify-center">
+      <Toaster />
       <div className="w-full sm:mx-auto sm:max-w-md px-3 sm:px-0">
         <div className="mx-auto flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
           <div className="relative bg-gradient-to-r from-blue-600 to-blue-800 p-1 sm:p-1.5 rounded text-white font-bold text-xs sm:text-sm">

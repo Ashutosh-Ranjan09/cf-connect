@@ -31,6 +31,7 @@ import {
 import { useCodeforcesData } from '@/app/providers';
 import { formatContestTime, timeUntilContest } from '@/lib/utils';
 import { AppShell } from '@/components/layout/app-shell';
+import { Toaster } from '@/components/ui/toaster';
 
 // Define the Contest interface based on the provided sample
 interface Contest {
@@ -200,6 +201,7 @@ export default function ContestsPage() {
   return (
     <AppShell>
       <div className="container mx-auto py-3 sm:py-4 md:py-6 px-2 sm:px-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
+        <Toaster />
         <div className="space-y-3 sm:space-y-4 md:space-y-6">
           <Card>
             <CardHeader className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2 sm:pb-3">

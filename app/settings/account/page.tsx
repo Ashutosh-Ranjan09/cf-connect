@@ -6,9 +6,12 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { useToast } from '@/hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 
 export default function SettingsPage() {
   const { logout } = useAuth();
+  const { toast } = useToast();
   
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -31,8 +34,16 @@ export default function SettingsPage() {
     try {
       await axios.patch('/api/account', { isPrivate: isPrivate });
       setIsPrivate(!isPrivate);
+      toast({
+        title: 'Privacy Updated',
+        description: `Your profile is now ${!isPrivate ? 'private' : 'public'}.`,
+      });
     } catch (err) {
-      // handle error (toast, etc.)
+      toast({
+        title: 'Error',
+        description: 'Failed to update privacy setting.',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
@@ -40,6 +51,7 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-xl mx-auto py-8">
+      <Toaster />
       <Card>
         <CardHeader>
           <CardTitle>Settings</CardTitle>

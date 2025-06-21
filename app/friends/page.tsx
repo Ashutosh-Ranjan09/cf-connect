@@ -21,7 +21,8 @@ import { AppShell } from '@/components/layout/app-shell';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 import UserSearch from '@/components/ui/usersearch';
-import {  Check } from 'lucide-react';
+import { Check } from 'lucide-react';
+import { Toaster } from '@/components/ui/toaster';
 export default function FriendsPage() {
   const { friends, isLoading } = useCodeforcesData();
   const [mounted, setMounted] = useState(false);
@@ -523,7 +524,7 @@ export default function FriendsPage() {
           </div>
 
           {/* Friend Suggestions Card */}
-          <div className="space-y-3 sm:space-y-4 md:space-y-6">
+          {/* <div className="space-y-3 sm:space-y-4 md:space-y-6">
             <Card className="overflow-hidden">
               <CardHeader className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2 sm:pb-3">
                 <CardTitle className="text-base sm:text-lg">
@@ -581,8 +582,9 @@ export default function FriendsPage() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </div> */}
         </div>
+        <Toaster />
       </div>
     </AppShell>
   );
