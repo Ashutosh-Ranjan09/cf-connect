@@ -32,7 +32,7 @@ export async function fetchServerData(handle?: string) {
       : { result: [] };
     const profile = await fetch(
       `https://codeforces.com/api/user.info?handles=${handle}`,
-      { next: { revalidate: 1 },cache: 'no-store' }
+      { next: { revalidate: 30 },cache: 'no-store' }
     );
     await dbConnect();
     const dbprofile = await UserModel.findOne({ username: handle });
