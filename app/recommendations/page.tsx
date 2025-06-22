@@ -4,32 +4,35 @@ import { getRatingColor } from '@/lib/utils';
 import axios from 'axios';
 import { cookies } from 'next/headers';
 
-interface RecommendedProblem {
-  _id: string;
+interface Recommendation {
   problemId: string;
   name: string;
   rating: number;
-  solvedCount: number;
   link: string;
 }
 
 export default async function RecommendationsPage() {
-  let problems: RecommendedProblem[] = [];
+  let problems: Recommendation[] = [];
   let error: string | null = null;
+
   try {
     const cookieHeader = cookies().toString();
     const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
     const host = process.env.NEXT_PUBLIC_BASE_URL || 'localhost:3000';
-    const url = `${protocol}://${host}/api/recommendations`;
-    const res = await axios.get(url, {
+    // Fetch recommendations from backend
+    const res = await axios.get(`${protocol}://${host}/api/recommendations`, {
       headers: { Cookie: cookieHeader },
       withCredentials: true,
     });
-    const data = res.data;
-    if (data.success) {
-      problems = data.problems;
+    if (res.data && res.data.success) {
+      problems = res.data.problems.map((p: any) => ({
+        problemId: p.problemId,
+        name: p.name,
+        rating: p.rating,
+        link: p.link,
+      }));
     } else {
-      error = data.message || 'Failed to fetch recommendations';
+      error = res.data?.message || 'Failed to fetch recommendations';
     }
   } catch (e: any) {
     error = e?.response?.data?.message || e?.message || 'Failed to fetch recommendations';
@@ -49,7 +52,7 @@ export default async function RecommendationsPage() {
           <div className="max-h-[75vh] overflow-y-auto">
             <div className="grid gap-4">
               {problems.map((problem) => (
-                <Card key={problem._id} className="flex items-center justify-between p-4">
+                <Card key={problem.problemId} className="flex items-center justify-between p-4">
                   <div>
                     <a
                       href={problem.link}

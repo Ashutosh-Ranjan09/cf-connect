@@ -98,9 +98,9 @@ export default function DashboardPage() {
               <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
                 {stats.totalSolved}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              {/* <p className="text-xs text-muted-foreground mt-1">
                 +12 from last month
-              </p>
+              </p> */}
             </CardContent>
           </Card>
 
@@ -114,9 +114,9 @@ export default function DashboardPage() {
               <div className="text-2xl sm:text-3xl font-bold">
                 {stats.totalSubmissions}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              {/* <p className="text-xs text-muted-foreground mt-1">
                 +43 from last month
-              </p>
+              </p> */}
             </CardContent>
           </Card>
 
@@ -130,9 +130,9 @@ export default function DashboardPage() {
               <div className="text-2xl sm:text-3xl font-bold">
                 {stats.acceptedRate}%
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              {/* <p className="text-xs text-muted-foreground mt-1">
                 +2% from last month
-              </p>
+              </p> */}
             </CardContent>
           </Card>
 
@@ -146,9 +146,9 @@ export default function DashboardPage() {
               <div className="text-2xl sm:text-3xl font-bold">
                 {stats.averageAttempts}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              {/* <p className="text-xs text-muted-foreground mt-1">
                 -0.3 from last month
-              </p>
+              </p> */}
             </CardContent>
           </Card>
         </div>
