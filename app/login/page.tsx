@@ -52,12 +52,13 @@ export default function LoginPage() {
     try {
       const success = await login(values.handle, values.password);
       if (success) {
+        router.push('/dashboard');
         toast({
           title: 'Login successful',
           description: 'Welcome to CF-Connect!',
           duration: 3000,
         });
-        router.push('/dashboard');
+        
       } else {
         toast({
           title: 'Login failed',

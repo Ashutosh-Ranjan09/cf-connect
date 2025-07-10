@@ -4,10 +4,11 @@ import { useAuth } from '@/app/providers';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
+import { Router } from 'next/router';
 
 export default function SettingsPage() {
   const { logout } = useAuth();
@@ -48,7 +49,18 @@ export default function SettingsPage() {
       setLoading(false);
     }
   };
-
+  const handleLogout = async () => {
+    try {
+      logout();
+    router.push('/');
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'Failed to log out. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
   return (
     <div className="max-w-xl mx-auto py-8">
       <Toaster />
@@ -63,7 +75,7 @@ export default function SettingsPage() {
           </div>
           <div className="flex gap-4">
             <Button variant="outline" onClick={() => router.push('/forgot-password')}>Reset Password</Button>
-            <Button variant="destructive" onClick={logout}>Log Out</Button>
+            <Button variant="destructive" onClick={handleLogout}>Log Out</Button>
           </div>
         </CardContent>
       </Card>
