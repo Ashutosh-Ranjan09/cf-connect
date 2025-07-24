@@ -84,7 +84,3 @@
 Contributions welcome! Submit issues or pull requests to help improve CF-Connect.
 
 ---
-
-### License
-
-Distributed under the MIT License. See `LICENSE` for details.
