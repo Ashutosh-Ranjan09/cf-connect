@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## CF-Connect: Competitive Programming Hub
 
-## Getting Started
+**CF-Connect** is your all-in-one platform designed by competitive programmers to track, analyze, and enhance your performance on Codeforces.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Core Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+* **Deep Analytics**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+  * Interactive charts and detailed statistics to visualize your problem-solving trends
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* **Connect & Compare**
 
-## Learn More
+  * Follow peers, compare performance, and maintain motivation through healthy competition
 
-To learn more about Next.js, take a look at the following resources:
+* **Competitive Edge**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+  * Global and friend leaderboards to see where you stand
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+* **Contest Tracking**
 
-## Deploy on Vercel
+  * Automated reminders for upcoming contests
+  * Post-contest performance breakdowns and analysis
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+* **Problem Recommendations**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+  * Curated problem sets aimed at boosting your rating and overall growth
+
+* **Community Network**
+
+  * Send and accept friend requests
+  * Engage with fellow programmers and share insights
+
+---
+
+### Technology Stack
+
+* **Frontend:** Next.js (React 19), Tailwind CSS, Radix UI, Lucide Icons
+* **Data Visualization:** Recharts
+* **Backend:** Next.js API routes, Mongoose (MongoDB)
+* **Authentication:** NextAuth.js
+* **State Management:** React Context & Hooks
+* **Utilities:** Axios, Zod, Lodash, date-fns
+
+---
+
+### Getting Started
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repo-url>
+   cd cf-connect
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
+   ```
+
+3. **Run development server**
+
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   # or
+   pnpm dev
+   ```
+
+4. **Access the app**
+   Open [http://localhost:3000](http://localhost:3000)
+
+---
+
+### Contributing
+
+Contributions welcome! Submit issues or pull requests to help improve CF-Connect.
+
+---
+
+### License
+
+Distributed under the MIT License. See `LICENSE` for details.
